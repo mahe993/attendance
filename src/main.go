@@ -19,12 +19,6 @@ import (
 	"attendance.com/src/router"
 )
 
-// var tpl *template.Template
-
-func init() {
-	// tpl = template.Must(template.ParseGlob("../templates/*"))
-}
-
 func main() {
 	http.HandleFunc("/", router.Routes)
 	http.Handle("/favicon.ico", http.NotFoundHandler())
