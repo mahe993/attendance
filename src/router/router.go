@@ -1,5 +1,5 @@
 /*
-Package router handles all the routing for http requests
+Package router handles routing to specific controllers
 */
 package router
 
@@ -18,5 +18,7 @@ func Routes(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case strings.HasPrefix(path, "/auth"):
 		controllers.AuthController(w, r)
+	default:
+		http.NotFound(w, r)
 	}
 }

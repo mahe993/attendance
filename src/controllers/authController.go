@@ -1,5 +1,5 @@
 /*
-Package controllers provides all the controllers for each specific use case
+Package controllers handles routing to specific services.
 */
 package controllers
 
