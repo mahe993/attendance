@@ -6,7 +6,7 @@ package services
 import (
 	"net/http"
 
-	"attendance.com/templates"
+	"attendance.com/src/templates"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 )

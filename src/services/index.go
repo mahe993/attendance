@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"attendance.com/templates"
+	"attendance.com/src/templates"
 )
 
 func Index(w http.ResponseWriter, r *http.Request) {
