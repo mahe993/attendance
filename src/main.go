@@ -1,12 +1,32 @@
+/*
+Package main is the entry point for the executable program.
+
+Description:
+
+	This program allows users to login and check-in to timestamp their attendance.
+	Admins can upload a list of users through a .csv file.
+	Users can login with their user ID which is made known to them by the admin, and is also recorded in the .csv.
+
+Usage:
+
+	$ go run main.go
+*/
 package main
 
 import (
-	"fmt"
+	"net/http"
 
-	users "attendance.com/src/user"
+	"attendance.com/src/router"
 )
 
+// var tpl *template.Template
+
+func init() {
+	// tpl = template.Must(template.ParseGlob("../templates/*"))
+}
+
 func main() {
-	fmt.Println("hello world")
-	users.GetUser()
+	http.HandleFunc("/", router.Routes)
+	http.Handle("/favicon.ico", http.NotFoundHandler())
+	http.ListenAndServe(":5332", nil)
 }
