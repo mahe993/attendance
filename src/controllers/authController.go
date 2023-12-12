@@ -4,28 +4,42 @@ Package controllers handles routing to specific services.
 package controllers
 
 import (
-	"fmt"
 	"net/http"
-	"os"
 	"strings"
 
 	"attendance.com/src/services"
 )
 
-func AuthController(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(os.Stdout, "control:: "+r.URL.Path+"\n")
+type AuthController struct{}
 
-	path := strings.TrimPrefix(r.URL.Path, "/auth")
+var (
+	Auth AuthController
+)
 
-	fmt.Fprint(os.Stdout, "subpath:: "+path+"\n")
-
-	switch path {
-	case "":
-		services.Login(w, r)
-	case "/logout":
-		services.Logout(w, r)
+func (*AuthController) Controller(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPost:
+		Auth.POST(w, r)
+	case http.MethodGet:
+		fallthrough
+	case http.MethodPut:
+		fallthrough
+	case http.MethodDelete:
+		fallthrough
 	default:
 		http.NotFound(w, r)
 	}
+}
 
+func (*AuthController) POST(w http.ResponseWriter, r *http.Request) {
+	path := strings.TrimPrefix(r.URL.Path, "/auth")
+
+	switch path {
+	case "":
+		services.Auth.Login(w, r)
+	case "/logout":
+		services.Auth.Logout(w, r)
+	default:
+		http.NotFound(w, r)
+	}
 }

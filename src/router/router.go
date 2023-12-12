@@ -18,15 +18,9 @@ func Routes(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(os.Stdout, "routes:: "+path+"\n")
 	switch {
 	case path == "/":
-		// protect "/" path
-		isAuthenticated := checkAuth(w, r)
-		if !isAuthenticated {
-			break
-		}
-
 		services.Index(w, r)
 	case strings.HasPrefix(path, "/auth"):
-		controllers.AuthController(w, r)
+		controllers.Auth.Controller(w, r)
 	default:
 		http.NotFound(w, r)
 	}

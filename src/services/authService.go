@@ -4,6 +4,7 @@ Package services provides business logic for performing requests specific to eac
 package services
 
 import (
+	"log"
 	"net/http"
 
 	"attendance.com/src/templates"
@@ -19,6 +20,12 @@ type User struct {
 	Last     string
 }
 
+type AuthService struct{}
+
+var (
+	Auth AuthService
+)
+
 // Variables that holds the auth states
 var (
 	mapUsers    = map[string]User{}
@@ -31,9 +38,8 @@ func init() {
 	mapUsers["admin"] = User{"admin", bPassword, "admin", "admin"}
 }
 
-func Login(res http.ResponseWriter, req *http.Request) {
+func (*AuthService) Login(res http.ResponseWriter, req *http.Request) {
 	if alreadyLoggedIn(req) {
-		http.Redirect(res, req, "/", http.StatusSeeOther)
 		return
 	}
 
@@ -43,6 +49,7 @@ func Login(res http.ResponseWriter, req *http.Request) {
 		password := req.FormValue("password")
 		// check if user exist with username
 		myUser, ok := mapUsers[username]
+		log.Println(myUser)
 		if !ok {
 			http.Error(res, "Username and/or password do not match", http.StatusUnauthorized)
 			return
@@ -65,10 +72,10 @@ func Login(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	templates.Tpl.ExecuteTemplate(res, "login.gohtml", nil)
+	templates.Tpl.ExecuteTemplate(res, "index.gohtml", nil)
 }
 
-func Logout(res http.ResponseWriter, req *http.Request) {
+func (*AuthService) Logout(res http.ResponseWriter, req *http.Request) {
 	if !alreadyLoggedIn(req) {
 		http.Redirect(res, req, "/", http.StatusSeeOther)
 		return
@@ -101,14 +108,17 @@ func GetUser(res http.ResponseWriter, req *http.Request) User {
 	// get current session cookie
 	myCookie, err := req.Cookie("myCookie")
 	if err != nil {
-		id := uuid.NewV4()
-		myCookie = &http.Cookie{
-			Name:  "myCookie",
-			Value: id.String(),
+		if err == http.ErrNoCookie {
+			id := uuid.NewV4()
+			myCookie = &http.Cookie{
+				Name:  "myCookie",
+				Value: id.String(),
+			}
+			http.SetCookie(res, myCookie)
+		} else {
+			log.Println(err)
 		}
-
 	}
-	http.SetCookie(res, myCookie)
 
 	// if the user exists already, get user
 	var myUser User
