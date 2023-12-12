@@ -14,6 +14,7 @@ Usage:
 package main
 
 import (
+	"log"
 	"net/http"
 
 	"attendance.com/src/router"
@@ -22,5 +23,7 @@ import (
 func main() {
 	http.HandleFunc("/", router.Routes)
 	http.Handle("/favicon.ico", http.NotFoundHandler())
-	http.ListenAndServe(":5332", nil)
+	log.Println("Server listening at port :5332...")
+	log.Fatal(http.ListenAndServe(":5332", nil))
+	log.Println("Server connection ended!")
 }

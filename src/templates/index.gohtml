@@ -6,18 +6,12 @@
 </head>
 <body>
 
-<h1>Welcome to the login and logout demonstration page.</h1>
+<nav>Welcome to the Attendance taking app!</nav>
 
-{{if .First}}
-    Welcome User {{.Username}}<br>
-    Your First name is {{.First}}<br>
-    Your Last name is {{.Last}}<br>
-<h2><a href="/restricted">Restricted Area</a></h2>
-<h2><a href="/auth/logout">Logout</a></h2>
+{{if not .ID}}
+    {{template "login.gohtml"}}
 {{else}}
-<h2>You are currently either not logged in or need to sign up for an account.</h2>
-<h2><a href="/auth/signup">Sign Up</a></h2>
-<h2><a href="/auth/login">Login</a></h2>
+    <h2>home page here <h2>
 {{end}}
 
 </body>

@@ -20,12 +20,7 @@ func AuthController(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(os.Stdout, "subpath:: "+path+"\n")
 
 	switch path {
-	// TODO: remove test cases
 	case "":
-		fmt.Fprint(w, "working auth")
-	case "/test":
-		fmt.Fprint(w, "hehe")
-	case "/login":
 		services.Login(w, r)
 	case "/logout":
 		services.Logout(w, r)
