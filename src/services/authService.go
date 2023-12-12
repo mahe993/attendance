@@ -4,9 +4,9 @@ Package services provides business logic for performing requests specific to eac
 package services
 
 import (
-	"log"
 	"net/http"
 
+	"attendance.com/src/logger"
 	"attendance.com/src/templates"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -49,7 +49,7 @@ func (*AuthService) Login(res http.ResponseWriter, req *http.Request) {
 		password := req.FormValue("password")
 		// check if user exist with username
 		myUser, ok := mapUsers[username]
-		log.Println(myUser)
+		logger.Println(myUser)
 		if !ok {
 			http.Error(res, "Username and/or password do not match", http.StatusUnauthorized)
 			return
@@ -116,7 +116,7 @@ func GetUser(res http.ResponseWriter, req *http.Request) User {
 			}
 			http.SetCookie(res, myCookie)
 		} else {
-			log.Println(err)
+			logger.Println(err)
 		}
 	}
 

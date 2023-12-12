@@ -1,12 +1,13 @@
 package logger
 
 import (
+	"fmt"
 	"log"
 	"runtime"
 	"strings"
 )
 
-func Println(msg string) {
+func Println(msg interface{}) {
 	_, file, line, ok := runtime.Caller(1)
 	if !ok {
 		file = "unknown"
@@ -17,5 +18,7 @@ func Println(msg string) {
 	fileName := strings.Join(splitFile[6:], "/")
 
 	// Log the message along with file name and line number
-	log.Printf("%s:%d - %s\n", fileName, line, msg)
+	fmt.Printf("%s:%d:::\n", fileName, line)
+	log.Println(msg)
+	fmt.Println()
 }
