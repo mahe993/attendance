@@ -17,13 +17,14 @@ import (
 	"log"
 	"net/http"
 
+	"attendance.com/src/logger"
 	"attendance.com/src/router"
 )
 
 func main() {
 	http.HandleFunc("/", router.Routes)
 	http.Handle("/favicon.ico", http.NotFoundHandler())
-	log.Println("Server listening at port :5332...")
+	logger.Println("Server listening at port :5332...")
 	log.Fatal(http.ListenAndServe(":5332", nil))
-	log.Println("Server connection ended!")
+	logger.Println("Server connection ended!")
 }
