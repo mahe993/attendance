@@ -60,30 +60,30 @@ func (*AuthService) Login(res http.ResponseWriter, req *http.Request) {
 
 	// create session cookie
 	id := uuid.NewV4()
-	myCookie := &http.Cookie{
-		Name:  "myCookie",
+	sessCookie := &http.Cookie{
+		Name:  "sessCookie",
 		Value: id.String(),
 		Path:  "/",
 	}
 
-	http.SetCookie(res, myCookie)
-	MapSessions[myCookie.Value] = loginID
+	http.SetCookie(res, sessCookie)
+	MapSessions[sessCookie.Value] = loginID
 
 	http.Redirect(res, req, fmt.Sprintf("/?user=%s", myUser.ID), http.StatusSeeOther)
 }
 
 func (*AuthService) Logout(res http.ResponseWriter, req *http.Request) {
-	myCookie, _ := req.Cookie("myCookie")
+	sessCookie, _ := req.Cookie("sessCookie")
 	// delete the session
-	delete(MapSessions, myCookie.Value)
+	delete(MapSessions, sessCookie.Value)
 	// remove the cookie
-	myCookie = &http.Cookie{
-		Name:   "myCookie",
+	sessCookie = &http.Cookie{
+		Name:   "sessCookie",
 		Value:  "",
 		MaxAge: -1,
 		Path:   "/",
 	}
-	http.SetCookie(res, myCookie)
+	http.SetCookie(res, sessCookie)
 
 	http.Redirect(res, req, "/", http.StatusSeeOther)
 }
@@ -93,7 +93,7 @@ func GetUser(res http.ResponseWriter, req *http.Request) User {
 	var myUser User
 
 	// get current session cookie
-	myCookie, err := req.Cookie("myCookie")
+	sessCookie, err := req.Cookie("sessCookie")
 	if err != nil {
 		if err != http.ErrNoCookie {
 			logger.Println(err)
@@ -101,7 +101,7 @@ func GetUser(res http.ResponseWriter, req *http.Request) User {
 		return myUser
 	}
 
-	if loginID, ok := MapSessions[myCookie.Value]; ok {
+	if loginID, ok := MapSessions[sessCookie.Value]; ok {
 		myUser = MapUsers[loginID]
 	}
 
