@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -16,9 +15,7 @@ var (
 
 func (*PageService) Index(w http.ResponseWriter, r *http.Request) {
 	currUser := GetUser(w, r)
-	s, _ := r.Cookie("myCookie")
-	fmt.Println(s)
-	fmt.Println(MapSessions)
+
 	err := templates.Tpl.ExecuteTemplate(w, "index", currUser)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)

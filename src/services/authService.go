@@ -4,7 +4,6 @@ Package services provides business logic for performing requests specific to eac
 package services
 
 import (
-	"fmt"
 	"net/http"
 
 	"attendance.com/src/logger"
@@ -43,38 +42,36 @@ func (*AuthService) Login(res http.ResponseWriter, req *http.Request) {
 		http.Redirect(res, req, "/", http.StatusSeeOther)
 		return
 	}
-	fmt.Println("hehe")
+
 	// process form submission
 	username := req.FormValue("username")
 	password := req.FormValue("password")
-	fmt.Println(username, password)
+
 	// check if user exist with username
 	myUser, ok := MapUsers[username]
-	logger.Println(myUser)
-	logger.Println("hihihihi")
-	fmt.Println(MapUsers[username])
+
 	if !ok {
 		http.Error(res, "Username and/or password do not match", http.StatusUnauthorized)
 		return
 	}
+
 	// Matching of password entered
 	err := bcrypt.CompareHashAndPassword(myUser.Password, []byte(password))
 	if err != nil {
 		http.Error(res, "Username and/or password do not match", http.StatusForbidden)
 		return
 	}
+
 	// create session
-	fmt.Println("a")
 	id := uuid.NewV4()
 	myCookie := &http.Cookie{
 		Name:  "myCookie",
 		Value: id.String(),
+		Path:  "/",
 	}
-	fmt.Println("b")
 	http.SetCookie(res, myCookie)
 	MapSessions[myCookie.Value] = username
-	fmt.Println("c")
-	logger.Println(MapSessions)
+
 	http.Redirect(res, req, "/", http.StatusSeeOther)
 }
 
@@ -83,7 +80,7 @@ func (*AuthService) Logout(res http.ResponseWriter, req *http.Request) {
 		http.Redirect(res, req, "/", http.StatusSeeOther)
 		return
 	}
-	fmt.Println("HAHAHHAAHAHHA")
+
 	myCookie, _ := req.Cookie("myCookie")
 	// delete the session
 	delete(MapSessions, myCookie.Value)
@@ -105,7 +102,6 @@ func alreadyLoggedIn(req *http.Request) bool {
 	}
 
 	username := MapSessions[myCookie.Value]
-	logger.Println("username:::" + username)
 	_, ok := MapUsers[username]
 	return ok
 }
