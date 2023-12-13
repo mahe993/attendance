@@ -4,6 +4,11 @@
   box-sizing: border-box;
 }
 
+body {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
 body,
 form {
   display: flex;
@@ -37,6 +42,10 @@ nav {
 
 button {
   padding: 0.25rem;
+}
+
+main {
+  width: 100%;
 }
 
 #main-header {

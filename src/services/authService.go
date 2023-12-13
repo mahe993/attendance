@@ -4,6 +4,7 @@ Package services provides business logic for performing requests specific to eac
 package services
 
 import (
+	"fmt"
 	"net/http"
 
 	"attendance.com/src/logger"
@@ -38,11 +39,6 @@ func init() {
 }
 
 func (*AuthService) Login(res http.ResponseWriter, req *http.Request) {
-	if alreadyLoggedIn(req) {
-		http.Redirect(res, req, "/", http.StatusSeeOther)
-		return
-	}
-
 	// process form submission
 	username := req.FormValue("username")
 	password := req.FormValue("password")
@@ -69,18 +65,16 @@ func (*AuthService) Login(res http.ResponseWriter, req *http.Request) {
 		Value: id.String(),
 		Path:  "/",
 	}
+	fmt.Println("CREATING:::", myCookie.Value)
 	http.SetCookie(res, myCookie)
 	MapSessions[myCookie.Value] = username
+	fmt.Println(MapSessions)
 
 	http.Redirect(res, req, "/", http.StatusSeeOther)
 }
 
 func (*AuthService) Logout(res http.ResponseWriter, req *http.Request) {
-	if !alreadyLoggedIn(req) {
-		http.Redirect(res, req, "/", http.StatusSeeOther)
-		return
-	}
-
+	fmt.Println("deleting cookie...")
 	myCookie, _ := req.Cookie("myCookie")
 	// delete the session
 	delete(MapSessions, myCookie.Value)
@@ -89,21 +83,11 @@ func (*AuthService) Logout(res http.ResponseWriter, req *http.Request) {
 		Name:   "myCookie",
 		Value:  "",
 		MaxAge: -1,
+		Path:   "/",
 	}
 	http.SetCookie(res, myCookie)
 
 	http.Redirect(res, req, "/", http.StatusSeeOther)
-}
-
-func alreadyLoggedIn(req *http.Request) bool {
-	myCookie, err := req.Cookie("myCookie")
-	if err != nil {
-		return false
-	}
-
-	username := MapSessions[myCookie.Value]
-	_, ok := MapUsers[username]
-	return ok
 }
 
 func GetUser(res http.ResponseWriter, req *http.Request) User {
