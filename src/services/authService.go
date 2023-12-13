@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"attendance.com/src/logger"
-	"attendance.com/src/templates"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -44,35 +43,30 @@ func (*AuthService) Login(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// process form submission
-	if req.Method == http.MethodPost {
-		username := req.FormValue("username")
-		password := req.FormValue("password")
-		// check if user exist with username
-		myUser, ok := mapUsers[username]
-		logger.Println(myUser)
-		if !ok {
-			http.Error(res, "Username and/or password do not match", http.StatusUnauthorized)
-			return
-		}
-		// Matching of password entered
-		err := bcrypt.CompareHashAndPassword(myUser.Password, []byte(password))
-		if err != nil {
-			http.Error(res, "Username and/or password do not match", http.StatusForbidden)
-			return
-		}
-		// create session
-		id := uuid.NewV4()
-		myCookie := &http.Cookie{
-			Name:  "myCookie",
-			Value: id.String(),
-		}
-		http.SetCookie(res, myCookie)
-		mapSessions[myCookie.Value] = username
-		http.Redirect(res, req, "/", http.StatusSeeOther)
+	username := req.FormValue("username")
+	password := req.FormValue("password")
+	// check if user exist with username
+	myUser, ok := mapUsers[username]
+	logger.Println(myUser)
+	if !ok {
+		http.Error(res, "Username and/or password do not match", http.StatusUnauthorized)
 		return
 	}
-
-	templates.Tpl.ExecuteTemplate(res, "index.gohtml", nil)
+	// Matching of password entered
+	err := bcrypt.CompareHashAndPassword(myUser.Password, []byte(password))
+	if err != nil {
+		http.Error(res, "Username and/or password do not match", http.StatusForbidden)
+		return
+	}
+	// create session
+	id := uuid.NewV4()
+	myCookie := &http.Cookie{
+		Name:  "myCookie",
+		Value: id.String(),
+	}
+	http.SetCookie(res, myCookie)
+	mapSessions[myCookie.Value] = username
+	http.Redirect(res, req, "/", http.StatusSeeOther)
 }
 
 func (*AuthService) Logout(res http.ResponseWriter, req *http.Request) {
@@ -80,6 +74,7 @@ func (*AuthService) Logout(res http.ResponseWriter, req *http.Request) {
 		http.Redirect(res, req, "/", http.StatusSeeOther)
 		return
 	}
+
 	myCookie, _ := req.Cookie("myCookie")
 	// delete the session
 	delete(mapSessions, myCookie.Value)
