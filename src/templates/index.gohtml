@@ -1,18 +1,20 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Welcome Page</title>
-</head>
-<body>
+{{define "index"}}
+    <!doctype html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Welcome Page</title>
+        <link rel="stylesheet" type="text/css" href="./css/index.css">
+    </head>
+    <body>
+    
+    {{template "navBar"}}
+    {{if not .ID}}
+        {{template "loginForm"}}
+    {{else}}
+        <h2>home page here <h2>
+    {{end}}
 
-<nav>Welcome to the Attendance taking app!</nav>
-
-{{if not .ID}}
-    {{template "login.gohtml"}}
-{{else}}
-    <h2>home page here <h2>
+    </body>
+    </html>
 {{end}}
-
-</body>
-</html>
