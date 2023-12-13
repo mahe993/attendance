@@ -4,7 +4,6 @@ Package services provides business logic for performing requests specific to eac
 package services
 
 import (
-	"fmt"
 	"net/http"
 
 	"attendance.com/src/logger"
@@ -58,23 +57,21 @@ func (*AuthService) Login(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// create session
+	// create session cookie
 	id := uuid.NewV4()
 	myCookie := &http.Cookie{
 		Name:  "myCookie",
 		Value: id.String(),
 		Path:  "/",
 	}
-	fmt.Println("CREATING:::", myCookie.Value)
+
 	http.SetCookie(res, myCookie)
 	MapSessions[myCookie.Value] = username
-	fmt.Println(MapSessions)
 
 	http.Redirect(res, req, "/", http.StatusSeeOther)
 }
 
 func (*AuthService) Logout(res http.ResponseWriter, req *http.Request) {
-	fmt.Println("deleting cookie...")
 	myCookie, _ := req.Cookie("myCookie")
 	// delete the session
 	delete(MapSessions, myCookie.Value)

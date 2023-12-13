@@ -41,6 +41,7 @@ nav {
 }
 
 button {
+  display: block;
   padding: 0.25rem;
 }
 
@@ -54,4 +55,14 @@ main {
   justify-content: space-between;
   padding: 0.25rem;
   border: 1px solid black;
+}
+
+#main-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#time-box {
+  font-size: 0.75rem;
 }

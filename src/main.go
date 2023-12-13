@@ -24,7 +24,9 @@ import (
 func main() {
 	http.HandleFunc("/", router.Routes)
 	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("./templates/css"))))
+	http.Handle("/scripts/", http.StripPrefix("/scripts/", http.FileServer(http.Dir("./templates/scripts"))))
 	http.Handle("/favicon.ico", http.NotFoundHandler())
+
 	logger.Println("Server listening at port :5332...")
 	log.Fatal(http.ListenAndServe(":5332", nil))
 	logger.Println("Server connection ended!")

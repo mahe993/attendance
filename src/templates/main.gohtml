@@ -2,7 +2,10 @@
     <main>
         <div id="main-header">
             <div>{{.First}} {{.Last}}</div>
-            {{template "logoutForm"}}
+            <div id="main-header-right">
+                <div id="time-box"></div>
+                {{template "logoutForm"}}
+            </div>
         </div>
     </main>
 {{end}}
