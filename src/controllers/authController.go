@@ -35,7 +35,7 @@ func (*AuthController) POST(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimPrefix(r.URL.Path, "/auth")
 
 	switch path {
-	case "":
+	case "/login":
 		services.Auth.Login(w, r)
 	case "/logout":
 		services.Auth.Logout(w, r)

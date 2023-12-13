@@ -12,7 +12,7 @@
     {{if not .ID}}
         {{template "loginForm"}}
     {{else}}
-        <h2>home page here <h2>
+        {{template "main" .}}
     {{end}}
 
     </body>

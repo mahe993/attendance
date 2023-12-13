@@ -4,6 +4,7 @@ Package services provides business logic for performing requests specific to eac
 package services
 
 import (
+	"fmt"
 	"net/http"
 
 	"attendance.com/src/logger"
@@ -27,27 +28,31 @@ var (
 
 // Variables that holds the auth states
 var (
-	mapUsers    = map[string]User{}
-	mapSessions = map[string]string{}
+	MapUsers    = map[string]User{}
+	MapSessions = map[string]string{}
 )
 
 func init() {
 	// init special access for admin
 	bPassword, _ := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.MinCost)
-	mapUsers["admin"] = User{"admin", bPassword, "admin", "admin"}
+	MapUsers["admin"] = User{"admin", bPassword, "admin", "admin"}
 }
 
 func (*AuthService) Login(res http.ResponseWriter, req *http.Request) {
 	if alreadyLoggedIn(req) {
+		http.Redirect(res, req, "/", http.StatusSeeOther)
 		return
 	}
-
+	fmt.Println("hehe")
 	// process form submission
 	username := req.FormValue("username")
 	password := req.FormValue("password")
+	fmt.Println(username, password)
 	// check if user exist with username
-	myUser, ok := mapUsers[username]
+	myUser, ok := MapUsers[username]
 	logger.Println(myUser)
+	logger.Println("hihihihi")
+	fmt.Println(MapUsers[username])
 	if !ok {
 		http.Error(res, "Username and/or password do not match", http.StatusUnauthorized)
 		return
@@ -59,13 +64,17 @@ func (*AuthService) Login(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 	// create session
+	fmt.Println("a")
 	id := uuid.NewV4()
 	myCookie := &http.Cookie{
 		Name:  "myCookie",
 		Value: id.String(),
 	}
+	fmt.Println("b")
 	http.SetCookie(res, myCookie)
-	mapSessions[myCookie.Value] = username
+	MapSessions[myCookie.Value] = username
+	fmt.Println("c")
+	logger.Println(MapSessions)
 	http.Redirect(res, req, "/", http.StatusSeeOther)
 }
 
@@ -74,10 +83,10 @@ func (*AuthService) Logout(res http.ResponseWriter, req *http.Request) {
 		http.Redirect(res, req, "/", http.StatusSeeOther)
 		return
 	}
-
+	fmt.Println("HAHAHHAAHAHHA")
 	myCookie, _ := req.Cookie("myCookie")
 	// delete the session
-	delete(mapSessions, myCookie.Value)
+	delete(MapSessions, myCookie.Value)
 	// remove the cookie
 	myCookie = &http.Cookie{
 		Name:   "myCookie",
@@ -94,31 +103,28 @@ func alreadyLoggedIn(req *http.Request) bool {
 	if err != nil {
 		return false
 	}
-	username := mapSessions[myCookie.Value]
-	_, ok := mapUsers[username]
+
+	username := MapSessions[myCookie.Value]
+	logger.Println("username:::" + username)
+	_, ok := MapUsers[username]
 	return ok
 }
 
 func GetUser(res http.ResponseWriter, req *http.Request) User {
+	// if the user exists already, get user
+	var myUser User
+
 	// get current session cookie
 	myCookie, err := req.Cookie("myCookie")
 	if err != nil {
-		if err == http.ErrNoCookie {
-			id := uuid.NewV4()
-			myCookie = &http.Cookie{
-				Name:  "myCookie",
-				Value: id.String(),
-			}
-			http.SetCookie(res, myCookie)
-		} else {
+		if err != http.ErrNoCookie {
 			logger.Println(err)
 		}
+		return myUser
 	}
 
-	// if the user exists already, get user
-	var myUser User
-	if username, ok := mapSessions[myCookie.Value]; ok {
-		myUser = mapUsers[username]
+	if username, ok := MapSessions[myCookie.Value]; ok {
+		myUser = MapUsers[username]
 	}
 
 	return myUser

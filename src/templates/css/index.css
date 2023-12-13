@@ -38,3 +38,11 @@ nav {
 button {
   padding: 0.25rem;
 }
+
+#main-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.25rem;
+  border: 1px solid black;
+}

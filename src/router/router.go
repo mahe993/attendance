@@ -17,7 +17,7 @@ func Routes(w http.ResponseWriter, r *http.Request) {
 	logger.Println("route:: " + path + "\n")
 	switch {
 	case path == "/":
-		services.Index(w, r)
+		services.Page.Index(w, r)
 	case strings.HasPrefix(path, "/auth"):
 		controllers.Auth.Controller(w, r)
 	default:

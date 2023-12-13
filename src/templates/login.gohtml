@@ -1,11 +1,11 @@
 {{define "loginForm"}}
-<h1>Please login to your account</h1>
-<form method="post" action="/auth">
-    <div>
-        <input type="text" name="username" placeholder="student ID"><br>
-        <input type="password" name="password" placeholder="password"><br>
-    </div>
-    <button type="submit">login</button>
-</form>
-<h2>Or <a href="auth/signup">Sign Up</a> if you do not have an account</h2>
+    <h1>Please login to your account</h1>
+    <form method="post" action="/auth/login">
+        <div>
+            <input type="text" name="username" placeholder="student ID"><br>
+            <input type="password" name="password" placeholder="password"><br>
+        </div>
+        <button type="submit">login</button>
+    </form>
+    <h2>Or <a href="auth/signup">Sign Up</a> if you do not have an account</h2>
 {{end}}
