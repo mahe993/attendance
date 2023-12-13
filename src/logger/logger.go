@@ -18,7 +18,6 @@ func Println(msg interface{}) {
 	fileName := strings.Join(splitFile[6:], "/")
 
 	// Log the message along with file name and line number
-	fmt.Printf("%s:%d:::\n", fileName, line)
-	log.Println(msg)
+	log.Printf(":::%s:%d:::\n%v\n", fileName, line, msg)
 	fmt.Println()
 }
