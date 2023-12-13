@@ -4,6 +4,7 @@ Package services provides business logic for performing requests specific to eac
 package services
 
 import (
+	"fmt"
 	"net/http"
 
 	"attendance.com/src/logger"
@@ -39,21 +40,21 @@ func init() {
 
 func (*AuthService) Login(res http.ResponseWriter, req *http.Request) {
 	// process form submission
-	username := req.FormValue("username")
+	loginID := req.FormValue("loginID")
 	password := req.FormValue("password")
 
-	// check if user exist with username
-	myUser, ok := MapUsers[username]
+	// check if user exist with loginID
+	myUser, ok := MapUsers[loginID]
 
 	if !ok {
-		http.Error(res, "Username and/or password do not match", http.StatusUnauthorized)
+		http.Error(res, "Login ID and/or password do not match", http.StatusUnauthorized)
 		return
 	}
 
 	// Matching of password entered
 	err := bcrypt.CompareHashAndPassword(myUser.Password, []byte(password))
 	if err != nil {
-		http.Error(res, "Username and/or password do not match", http.StatusForbidden)
+		http.Error(res, "Login ID and/or password do not match", http.StatusForbidden)
 		return
 	}
 
@@ -66,9 +67,9 @@ func (*AuthService) Login(res http.ResponseWriter, req *http.Request) {
 	}
 
 	http.SetCookie(res, myCookie)
-	MapSessions[myCookie.Value] = username
+	MapSessions[myCookie.Value] = loginID
 
-	http.Redirect(res, req, "/", http.StatusSeeOther)
+	http.Redirect(res, req, fmt.Sprintf("/?user=%s", myUser.ID), http.StatusSeeOther)
 }
 
 func (*AuthService) Logout(res http.ResponseWriter, req *http.Request) {
@@ -100,8 +101,8 @@ func GetUser(res http.ResponseWriter, req *http.Request) User {
 		return myUser
 	}
 
-	if username, ok := MapSessions[myCookie.Value]; ok {
-		myUser = MapUsers[username]
+	if loginID, ok := MapSessions[myCookie.Value]; ok {
+		myUser = MapUsers[loginID]
 	}
 
 	return myUser
