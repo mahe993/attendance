@@ -40,6 +40,18 @@ nav {
   font-weight: bold;
 }
 
+#nav-links-container {
+  margin-top: 1rem;
+}
+
+#nav-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  list-style: none;
+}
+
 button {
   display: block;
   padding: 0.25rem;
@@ -53,7 +65,9 @@ main {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.25rem;
+  padding: 0.5rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
   border: 1px solid black;
 }
 
@@ -64,5 +78,10 @@ main {
 }
 
 #time-box {
-  font-size: 0.75rem;
+  font-size: 1rem;
+}
+
+#name-display {
+  font-size: 1rem;
+  font-weight: bold;
 }

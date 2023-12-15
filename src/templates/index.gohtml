@@ -8,7 +8,7 @@
     </head>
     <body>
     
-    {{template "navBar"}}
+    {{template "navBar" .User}}
     {{if not .User.ID}}
         {{template "loginForm"}}
     {{else}}

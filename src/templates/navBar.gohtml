@@ -1,6 +1,17 @@
 {{define "navBar"}}
     <nav>
         <div id="nav-title">Attendance Checker</div>
-        <div id="nav-links">links</div>
+        {{if eq .ID "admin"}}
+            <div id="nav-links-container">
+                <ul id="nav-links">
+                    <li>
+                        <a href="/upload">Upload Student List</a>
+                    </li>
+                     <li>
+                        <a href="/upload">View Student Attendance</a>
+                    </li>
+                </ul>
+            </div>
+        {{end}}
     </nav>
 {{end}}

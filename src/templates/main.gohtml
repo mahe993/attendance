@@ -1,7 +1,13 @@
 {{define "main"}}
     <main>
         <div id="main-header">
-            <div>{{.User.First}} {{.User.Last}}</div>
+            <div id="name-display">
+                {{if eq .User.ID "admin"}}
+                    Administrator
+                {{else}}
+                    {{.User.First}} {{.User.Last}}
+                {{end}}
+            </div>
             <div id="main-header-right">
                 <div id="time-box"></div>
                 {{template "logoutForm"}}
