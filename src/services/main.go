@@ -7,18 +7,18 @@ import (
 	"attendance.com/src/templates"
 )
 
-type PageVariables struct {
+type MainPageVariables struct {
 	User User
 }
-type PageService struct {
-	Variables PageVariables
+type MainService struct {
+	Variables MainPageVariables
 }
 
 var (
-	Page PageService
+	MainPage MainService
 )
 
-func (p *PageService) Index(w http.ResponseWriter, r *http.Request) {
+func (p *MainService) Index(w http.ResponseWriter, r *http.Request) {
 	currUser := Auth.GetUser(r)
 	if currUser != nil {
 		p.Variables.User = *currUser

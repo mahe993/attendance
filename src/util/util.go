@@ -4,6 +4,8 @@ Package utils offers various utility functions that can be used throughout the a
 package utils
 
 import (
+	"encoding/csv"
+	"io"
 	"log"
 	"net"
 	"os"
@@ -64,4 +66,13 @@ func ValidateIP() (bool, error) {
 	}
 
 	return false, nil
+}
+
+func ReadCSV(file io.Reader) ([][]string, error) {
+	reader := csv.NewReader(file)
+	records, err := reader.ReadAll()
+	if err != nil {
+		return nil, err
+	}
+	return records, nil
 }

@@ -7,6 +7,7 @@
 body {
   padding-left: 1rem;
   padding-right: 1rem;
+  width: 100dvw;
 }
 
 body,
@@ -52,6 +53,14 @@ nav {
   list-style: none;
 }
 
+a {
+  color: #000;
+}
+
+a:visited {
+  color: #000;
+}
+
 button {
   display: block;
   padding: 0.25rem;
@@ -59,6 +68,11 @@ button {
 
 main {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
 }
 
 #main-header {
@@ -69,6 +83,7 @@ main {
   padding-left: 1rem;
   padding-right: 1rem;
   border: 1px solid black;
+  width: 100%;
 }
 
 #main-header-right {

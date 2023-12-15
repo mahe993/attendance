@@ -1,0 +1,32 @@
+{{define "adminPage"}}
+    <!doctype html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Welcome Page</title>
+        <link rel="stylesheet" type="text/css" href="./css/index.css">
+    </head>
+    <body>
+    
+    {{template "navBar" .User}}
+    {{template "main" .}}
+
+    {{if eq .Tab "upload"}}
+        <div>
+            <form action="/admin/upload" method="POST" enctype="multipart/form-data">
+                <label for="csvFile">Choose a .csv file:</label>
+                <input type="file" id="csvFile" name="csvFile" accept=".csv">
+                <input type="submit" value="Upload">
+            </form>
+        </div>
+    {{else if eq .Tab "success"}}
+        <div>Upload Success!</div>
+    {{else if eq .Tab "overview"}}
+        <div>overview!</div>
+    {{end}}
+
+    </body>
+    <script src="./scripts/script.js"></script>
+
+    </html>
+{{end}}

@@ -17,18 +17,26 @@ func Routes(w http.ResponseWriter, r *http.Request) {
 	logger.Println("route:: " + path + "\n")
 	switch {
 	case path == "/":
-		services.Page.Index(w, r)
+		services.MainPage.Index(w, r)
 	case strings.HasPrefix(path, "/auth"):
 		controllers.Auth.Controller(w, r)
+	case strings.HasPrefix(path, "/admin"):
+		if isAdmin := checkAdmin(w, r); !isAdmin {
+			break
+		}
+		controllers.Admin.Controller(w, r)
 	default:
 		http.NotFound(w, r)
 	}
 }
 
-func checkAuth(w http.ResponseWriter, r *http.Request) bool {
+func checkAdmin(w http.ResponseWriter, r *http.Request) bool {
 	currUser := services.Auth.GetUser(r)
-	if currUser.ID == "" {
-		http.Redirect(w, r, "/auth", http.StatusFound)
+
+	if currUser == nil || currUser != nil && currUser.ID != "admin" {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return false
 	}
-	return currUser.ID == ""
+
+	return currUser.ID == "admin"
 }
