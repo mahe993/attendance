@@ -9,7 +9,7 @@
     <body>
     
     {{template "navBar"}}
-    {{if not .ID}}
+    {{if not .User.ID}}
         {{template "loginForm"}}
     {{else}}
         {{template "main" .}}

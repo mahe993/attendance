@@ -26,7 +26,7 @@ func Routes(w http.ResponseWriter, r *http.Request) {
 }
 
 func checkAuth(w http.ResponseWriter, r *http.Request) bool {
-	currUser := services.GetUser(w, r)
+	currUser := services.Auth.GetUser(r)
 	if currUser.ID == "" {
 		http.Redirect(w, r, "/auth", http.StatusFound)
 	}
