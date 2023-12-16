@@ -21,7 +21,7 @@ type User struct {
 }
 
 type AuthService struct {
-	currUser *User
+	currUser User
 }
 
 var (
@@ -30,7 +30,7 @@ var (
 
 // Variables that holds all user and session details
 var (
-	MapUsers    = map[string]*User{}
+	MapUsers    = map[string]User{}
 	MapSessions = map[string]string{}
 )
 
@@ -38,7 +38,7 @@ func init() {
 	// init special access for admin
 	logger.Println("Initializing admin user")
 	bPassword, _ := bcrypt.GenerateFromPassword([]byte(os.Getenv("ADMIN_PASSWORD")), bcrypt.MinCost)
-	MapUsers["admin"] = &User{"admin", bPassword, "admin", "admin"}
+	MapUsers["admin"] = User{"admin", bPassword, "admin", "admin"}
 	logger.Println("Success!")
 }
 
@@ -85,11 +85,11 @@ func (a *AuthService) Logout(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, sessCookie)
 
-	a.currUser = nil
+	a.currUser = User{}
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func (a *AuthService) GetUser(r *http.Request) *User {
+func (a *AuthService) GetUser(r *http.Request) User {
 	// get current session cookie
 	sessCookie, err := r.Cookie("sessCookie")
 	if err != nil {

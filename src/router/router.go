@@ -33,9 +33,8 @@ func Routes(w http.ResponseWriter, r *http.Request) {
 func checkAdmin(w http.ResponseWriter, r *http.Request) bool {
 	currUser := services.Auth.GetUser(r)
 
-	if currUser == nil || currUser != nil && currUser.ID != "admin" {
+	if currUser.ID != "admin" {
 		http.Redirect(w, r, "/", http.StatusFound)
-		return false
 	}
 
 	return currUser.ID == "admin"

@@ -20,11 +20,7 @@ var (
 
 func (p *MainService) Index(w http.ResponseWriter, r *http.Request) {
 	currUser := Auth.GetUser(r)
-	if currUser != nil {
-		p.Variables.User = *currUser
-	} else {
-		p.Variables.User = User{}
-	}
+	p.Variables.User = currUser
 
 	err := templates.Tpl.ExecuteTemplate(w, "index", p.Variables)
 	if err != nil {
