@@ -100,3 +100,7 @@ main {
   font-size: 1rem;
   font-weight: bold;
 }
+
+footer {
+  color: rgb(95, 95, 95);
+}

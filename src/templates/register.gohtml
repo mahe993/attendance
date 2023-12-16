@@ -1,0 +1,30 @@
+{{define "registrationPage"}}
+    <!doctype html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Registration</title>
+        <link rel="stylesheet" type="text/css" href="../../css/index.css">
+    </head>
+    <body>
+    
+    <h1>Please register your account</h1>
+    <form method="POST" action="/auth/register">
+        <div>
+            <input type="text" name="loginID" placeholder="login ID">
+            <br>
+            <input type="password" name="password" placeholder="password">
+            <br>
+        </div>
+        <button type="submit">register</button>
+    </form>
+
+    <footer>
+    <em>*Only official students can register. You should already know your student/staff ID.</em>
+    <br>
+    Enter your student/staff ID as login ID, and enter your desired password to register.
+    </footer>
+
+    </body>
+    </html>
+{{end}}

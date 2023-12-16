@@ -6,20 +6,22 @@
         <title>Admin Controls</title>
         <link rel="stylesheet" type="text/css" href="../css/index.css">
     </head>
+
     <body>
     
-    {{template "navBar" .User}}
-    {{template "main" .}}
+        {{template "navBar" .User}}
+        {{template "main" .}}
 
-    {{if eq .Tab "upload"}}
-        {{template "uploadForm"}}
-    {{else if eq .Tab "success"}}
-        <div>Upload Success!</div>
-    {{else if eq .Tab "overview"}}
-        {{template "adminOverview"}}
-    {{end}}
+        {{if eq .Tab "upload"}}
+            {{template "uploadForm"}}
+        {{else if eq .Tab "success"}}
+            <div>Upload Success!</div>
+        {{else if eq .Tab "overview"}}
+            {{template "adminOverview"}}
+        {{end}}
 
     </body>
+
     <script src="../scripts/script.js"></script>
 
     </html>
