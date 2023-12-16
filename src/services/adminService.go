@@ -46,6 +46,7 @@ func (p *AdminService) UploadStudentsList(w http.ResponseWriter, r *http.Request
 	defer func() {
 		if err := recover(); err != nil {
 			logger.Println("error updating users.json::" + err.(error).Error())
+			http.Redirect(w, r, "/", http.StatusFound)
 		}
 	}()
 
@@ -86,6 +87,14 @@ func (p *AdminService) UploadStudentsList(w http.ResponseWriter, r *http.Request
 			First: line[1],
 			Last:  line[2],
 		}
+
+		// if the student already exists in MapUsers, update their name
+		if user, ok := MapUsers[student.ID]; ok {
+			user.First, user.Last = student.First, student.Last
+			MapUsers[student.ID] = user
+			continue
+		}
+
 		MapUsers[student.ID] = student
 	}
 

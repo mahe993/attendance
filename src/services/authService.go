@@ -4,10 +4,14 @@ Package services provides business logic for performing requests specific to eac
 package services
 
 import (
+	"log"
 	"net/http"
 	"os"
+	"strings"
 
+	"attendance.com/src/db"
 	"attendance.com/src/logger"
+	"attendance.com/src/templates"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -20,8 +24,14 @@ type User struct {
 	Last     string
 }
 
+type RegistrationPageVariables struct {
+	User User
+	Tab  string
+}
+
 type AuthService struct {
-	currUser User
+	currUser  User
+	Variables RegistrationPageVariables
 }
 
 var (
@@ -35,10 +45,24 @@ var (
 )
 
 func init() {
+	defer func() {
+		if err := recover(); err != nil {
+			logger.Println("error initializing users::" + err.(error).Error())
+		}
+	}()
+
 	// init special access for admin
 	logger.Println("Initializing admin user")
 	bPassword, _ := bcrypt.GenerateFromPassword([]byte(os.Getenv("ADMIN_PASSWORD")), bcrypt.MinCost)
 	MapUsers["admin"] = User{"admin", bPassword, "admin", "admin"}
+	logger.Println("Success!")
+
+	// init users from users.json
+	logger.Println("Initializing users")
+	// Can potentially panic if unable to read from file
+	if err := db.Read("users.json", &MapUsers); err != nil {
+		logger.Println(err)
+	}
 	logger.Println("Success!")
 }
 
@@ -104,6 +128,69 @@ func (a *AuthService) GetUser(r *http.Request) User {
 	}
 
 	return a.currUser
+}
+
+func (a *AuthService) RegisterPage(w http.ResponseWriter, r *http.Request) {
+	currUser := Auth.GetUser(r)
+	a.Variables.User = currUser
+	a.Variables.Tab = strings.Split(r.URL.Path, "/")[len(strings.Split(r.URL.Path, "/"))-1]
+
+	err := templates.Tpl.ExecuteTemplate(w, "registrationPage", a.Variables)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		log.Fatal("Template execution error:", err)
+		return
+	}
+}
+
+func (a *AuthService) Register(w http.ResponseWriter, r *http.Request) {
+	defer func() {
+		if err := recover(); err != nil {
+			logger.Println("error updating users.json::" + err.(error).Error())
+			http.Redirect(w, r, "/", http.StatusFound)
+		}
+	}()
+
+	// process form submission
+	loginID := r.FormValue("loginID")
+	password := r.FormValue("password")
+
+	// check if user exist with loginID
+	user, ok := MapUsers[loginID]
+	logger.Println(user)
+
+	if ok {
+		// check if user already has a password
+		if len(user.Password) > 0 {
+			http.Error(w, "Login ID already registered, try signing in instead.", http.StatusUnauthorized)
+			return
+		}
+	} else {
+		http.Error(w, "Login ID not recognized.", http.StatusUnauthorized)
+		return
+	}
+
+	// hash the password
+	bPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		log.Fatal("Password hashing error:", err)
+		return
+	}
+
+	// register user
+	user.Password = bPassword
+	logger.Println(user)
+	MapUsers[loginID] = user
+	logger.Println(MapUsers[loginID])
+	// Write MapUsers to database
+	// Can potentially panic here if the database is not writable
+	err = db.Write(MapUsers, "users.json")
+	if err != nil {
+		logger.Println(err)
+	}
+
+	http.Redirect(w, r, "/auth/success", http.StatusSeeOther)
 }
 
 func createSessCookie(w http.ResponseWriter, r *http.Request) <-chan string {

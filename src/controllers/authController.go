@@ -21,7 +21,7 @@ func (*AuthController) Controller(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		Auth.POST(w, r)
 	case http.MethodGet:
-		fallthrough
+		Auth.GET(w, r)
 	case http.MethodPut:
 		fallthrough
 	case http.MethodDelete:
@@ -39,6 +39,21 @@ func (*AuthController) POST(w http.ResponseWriter, r *http.Request) {
 		services.Auth.Login(w, r)
 	case "/logout":
 		services.Auth.Logout(w, r)
+	case "/register":
+		services.Auth.Register(w, r)
+	default:
+		http.NotFound(w, r)
+	}
+}
+
+func (*AuthController) GET(w http.ResponseWriter, r *http.Request) {
+	path := strings.TrimPrefix(r.URL.Path, "/auth")
+
+	switch path {
+	case "/success":
+		fallthrough
+	case "/register":
+		services.Auth.RegisterPage(w, r)
 	default:
 		http.NotFound(w, r)
 	}
