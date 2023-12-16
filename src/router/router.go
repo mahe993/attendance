@@ -25,6 +25,12 @@ func Routes(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		controllers.Admin.Controller(w, r)
+
+	// Handle static files
+	case strings.HasSuffix(path, ".css"):
+		http.ServeFile(w, r, "./templates/css/index.css")
+	case strings.HasSuffix(path, ".js"):
+		http.ServeFile(w, r, "./templates/scripts/script.js")
 	default:
 		http.NotFound(w, r)
 	}

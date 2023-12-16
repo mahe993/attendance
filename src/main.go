@@ -23,14 +23,6 @@ import (
 
 func main() {
 	http.HandleFunc("/", router.Routes)
-
-	// Handle css and javascript files
-	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("./templates/css"))))
-	http.Handle("/admin/css/", http.StripPrefix("/admin/css/", http.FileServer(http.Dir("./templates/css"))))
-	http.Handle("/admin/scripts/", http.StripPrefix("/admin/scripts/", http.FileServer(http.Dir("./templates/scripts"))))
-	http.Handle("/scripts/", http.StripPrefix("/scripts/", http.FileServer(http.Dir("./templates/scripts"))))
-
-	// Handle favicon
 	http.Handle("/favicon.ico", http.NotFoundHandler())
 
 	logger.Println("Server listening at port :5332...")
