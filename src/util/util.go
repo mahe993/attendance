@@ -10,6 +10,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"strconv"
 	"strings"
 
 	"attendance.com/src/logger"
@@ -24,12 +25,6 @@ func init() {
 	}
 	logger.Println("Success!")
 }
-
-// Variables for env values
-var (
-	SUB_IP_1 = os.Getenv("VALID_IP_ADDR_1")
-	SUB_IP_2 = os.Getenv("VALID_IP_ADDR_2")
-)
 
 // ValidateIP validates the IP address of the user to ensure it matches the config and returns a boolean indication and error.
 func ValidateIP() (bool, error) {
@@ -53,11 +48,26 @@ func ValidateIP() (bool, error) {
 
 			for _, v := range addresses {
 				addressSlice := strings.Split(v.String(), ".")
+				validIPSlice := strings.Split(os.Getenv("NP_IP_ADDR"), ".")
 
 				// check if address slice == x.x.x.x
 				if len(addressSlice) == 4 {
+					octetRange1, err := strconv.Atoi(addressSlice[2])
+					if err != nil {
+						logger.Println(err)
+						return false, err
+					}
+					octetRange2, err := strconv.Atoi(addressSlice[3][:3])
+					if err != nil {
+						logger.Println(err)
+						return false, err
+					}
+
 					// validate address
-					if addressSlice[0] == SUB_IP_1 && addressSlice[1] == SUB_IP_2 {
+					if addressSlice[0] == validIPSlice[0] &&
+						addressSlice[1] == validIPSlice[1] &&
+						octetRange1 >= 0 && octetRange1 <= 255 &&
+						octetRange2 >= 0 && octetRange2 <= 255 {
 						return true, nil
 					}
 					return false, nil
