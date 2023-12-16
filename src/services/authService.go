@@ -5,6 +5,7 @@ package services
 
 import (
 	"net/http"
+	"os"
 
 	"attendance.com/src/logger"
 	uuid "github.com/satori/go.uuid"
@@ -35,8 +36,10 @@ var (
 
 func init() {
 	// init special access for admin
-	bPassword, _ := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.MinCost)
+	logger.Println("Initializing admin user")
+	bPassword, _ := bcrypt.GenerateFromPassword([]byte(os.Getenv("ADMIN_PASSWORD")), bcrypt.MinCost)
 	MapUsers["admin"] = &User{"admin", bPassword, "admin", "admin"}
+	logger.Println("Success!")
 }
 
 func (a *AuthService) Login(w http.ResponseWriter, r *http.Request) {

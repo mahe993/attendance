@@ -51,6 +51,13 @@ nav {
   justify-content: center;
   gap: 1.5rem;
   list-style: none;
+  width: 50%;
+}
+
+#nav-links li {
+  flex-grow: 1;
+  background-color: aqua;
+  color: blue;
 }
 
 a {
