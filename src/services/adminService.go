@@ -39,6 +39,9 @@ func (p *AdminService) Index(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// UploadStudentsList function is used to upload a CSV file containing a list of students.
+// Errors on non-CSV files, saves a copy of the uploaded CSV file to /db/uploads,
+// and updates the MapUsers state. DB users.json is then updated with the new MapUsers state.
 func (p *AdminService) UploadStudentsList(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
