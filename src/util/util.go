@@ -5,6 +5,7 @@ package utils
 
 import (
 	"encoding/csv"
+	"fmt"
 	"io"
 	"log"
 	"net"
@@ -75,4 +76,33 @@ func ReadCSV(file io.Reader) ([][]string, error) {
 		return nil, err
 	}
 	return records, nil
+}
+
+// WriteCSV writes the given CSV data to the given file path.
+// It returns a channel that can be used to wait for the write to complete.
+// Saving a copy of csv uploads is low priority and thus does not panic on errors
+func WriteCSV(filePath string, csvData [][]string) <-chan bool {
+	done := make(chan bool)
+	go func() {
+		defer close(done)
+
+		destFile, err := os.Create(filePath)
+		if err != nil {
+			logger.Println(fmt.Sprint("Error creating CSV file:", err))
+			return
+		}
+		defer destFile.Close()
+
+		// Write each row of the CSV data to the output file.
+		csvWriter := csv.NewWriter(destFile)
+		for _, line := range csvData {
+			if err := csvWriter.Write(line); err != nil {
+				logger.Println(fmt.Sprint("Error writing to CSV file:", err))
+				return
+			}
+		}
+		csvWriter.Flush()
+	}()
+
+	return done
 }
