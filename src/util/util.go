@@ -7,24 +7,13 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"os"
 	"strconv"
 	"strings"
 
 	"attendance.com/src/logger"
-	"github.com/joho/godotenv"
 )
-
-func init() {
-	logger.Println("Initializing envs...")
-	err := godotenv.Load("../.env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-	logger.Println("Success!")
-}
 
 // ValidateIP validates the IP address of the user to ensure it matches the config and returns a boolean indication and error.
 func ValidateIP() (bool, error) {
@@ -48,7 +37,8 @@ func ValidateIP() (bool, error) {
 
 			for _, v := range addresses {
 				addressSlice := strings.Split(v.String(), ".")
-				validIPSlice := strings.Split(os.Getenv("NP_IP_ADDR"), ".")
+				// TODO: change to NP_IP_ADDR to test different network
+				validIPSlice := strings.Split(os.Getenv("VALID_IP_ADDR"), ".")
 
 				// check if address slice == x.x.x.x
 				if len(addressSlice) == 4 {

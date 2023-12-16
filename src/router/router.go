@@ -21,11 +21,15 @@ func Routes(w http.ResponseWriter, r *http.Request) {
 	case strings.HasPrefix(path, "/auth"):
 		controllers.Auth.Controller(w, r)
 	case strings.HasPrefix(path, "/admin"):
-		if isAdmin := checkAdmin(w, r); !isAdmin {
+		if isAdmin := checkAuth(w, r, true); !isAdmin {
 			break
 		}
 		controllers.Admin.Controller(w, r)
-
+	case strings.HasPrefix(path, "/user"):
+		if isAuthenticated := checkAuth(w, r, false); !isAuthenticated {
+			break
+		}
+		controllers.User.Controller(w, r)
 	// Handle static files
 	case strings.HasSuffix(path, ".css"):
 		http.ServeFile(w, r, "./templates/css/index.css")
@@ -36,8 +40,16 @@ func Routes(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func checkAdmin(w http.ResponseWriter, r *http.Request) bool {
+func checkAuth(w http.ResponseWriter, r *http.Request, adminCheck bool) bool {
 	currUser := services.Auth.GetUser(r)
+
+	if currUser.ID == "" {
+		http.Redirect(w, r, "/", http.StatusFound)
+	}
+
+	if !adminCheck {
+		return currUser.ID != ""
+	}
 
 	if currUser.ID != "admin" {
 		http.Redirect(w, r, "/", http.StatusFound)

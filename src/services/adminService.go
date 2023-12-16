@@ -10,12 +10,13 @@ import (
 
 	"attendance.com/src/db"
 	"attendance.com/src/logger"
+	"attendance.com/src/states"
 	"attendance.com/src/templates"
 	utils "attendance.com/src/util"
 )
 
 type AdminPageVariables struct {
-	User User
+	User states.User
 	Tab  string
 }
 type AdminService struct {
@@ -41,7 +42,7 @@ func (p *AdminService) Index(w http.ResponseWriter, r *http.Request) {
 
 // UploadStudentsList function is used to upload a CSV file containing a list of students.
 // Errors on non-CSV files, saves a copy of the uploaded CSV file to /db/uploads,
-// and updates the MapUsers state. DB users.json is then updated with the new MapUsers state.
+// and updates the states.MapUsers state. DB users.json is then updated with the new states.MapUsers state.
 func (p *AdminService) UploadStudentsList(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -79,28 +80,28 @@ func (p *AdminService) UploadStudentsList(w http.ResponseWriter, r *http.Request
 	// e.g. studentList_2021-08-01_12:00:00.csv
 	saveCSV := utils.WriteCSV(fmt.Sprintf("%s/db/uploads/studentList_%s.csv", os.Getenv("APP_BASE_PATH"), time.Now().Format("2006-01-02_15:04:05")), csvData)
 
-	// Update MapUsers with the uploaded student list
+	// Update states.MapUsers with the uploaded student list
 	headlessCSVData := csvData[1:]
 	for _, line := range headlessCSVData {
-		student := User{
+		student := states.User{
 			ID:    line[0],
 			First: line[1],
 			Last:  line[2],
 		}
 
-		// if the student already exists in MapUsers, update their name
-		if user, ok := MapUsers[student.ID]; ok {
+		// if the student already exists in states.MapUsers, update their name
+		if user, ok := states.MapUsers[student.ID]; ok {
 			user.First, user.Last = student.First, student.Last
-			MapUsers[student.ID] = user
+			states.MapUsers[student.ID] = user
 			continue
 		}
 
-		MapUsers[student.ID] = student
+		states.MapUsers[student.ID] = student
 	}
 
-	// Write MapUsers to database
+	// Write MapUsers state to database
 	// Can potentially panic here if the database is not writable
-	err = db.Write(MapUsers, "users.json")
+	err = db.Write(states.MapUsers, "users.json")
 	if err != nil {
 		logger.Println(err)
 	}

@@ -1,11 +1,12 @@
 {{define "main"}}
     <main>
+
         <div id="main-header">
             <div id="name-display">
                 {{if eq .User.ID "admin"}}
                     Administrator
                 {{else}}
-                    {{.User.First}} {{.User.Last}}
+                    {{.User.First}} {{.User.Last}}, {{.User.ID}}
                 {{end}}
             </div>
             <div id="main-header-right">
@@ -13,5 +14,31 @@
                 {{template "logoutForm"}}
             </div>
         </div>
+
+        {{if ne .User.ID "admin"}}
+            <div id="main-body">
+                {{if eq .Tab "success"}}
+                    <div id="success-check-in">
+                        <em>
+                            <strong>
+                                Successful check-in: {{isCheckedIn .User.ID}}
+                            </strong>
+                        </em>
+                    </div>
+                {{else if isCheckedIn .User.ID}}
+                    <div class="attendance-form">
+                        You are already checked in for today
+                    </div>
+                    <footer>
+                        <em>
+                            Checked-in time: {{isCheckedIn .User.ID}}
+                        </em>
+                    </footer>
+                {{else}}
+                    {{template "attendanceForm"}}
+                {{end}}
+            </div>
+        {{end}}
+
     </main>
 {{end}}

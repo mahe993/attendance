@@ -11,6 +11,7 @@ import (
 
 func Read(filePath string, payload interface{}) error {
 	bs, err := os.ReadFile(os.Getenv("APP_DB_PATH") + filePath)
+	logger.Println(os.Getenv("APP_DB_PATH") + filePath)
 	if err != nil {
 		logger.Println(err)
 		panic(errors.New("unable to read from file:" + filePath))
