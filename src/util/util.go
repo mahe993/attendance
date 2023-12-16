@@ -26,8 +26,9 @@ func init() {
 
 // Variables for env values
 var (
-	SUB_IP_1 = os.Getenv("VALID_IP_ADDR_1")
-	SUB_IP_2 = os.Getenv("VALID_IP_ADDR_2")
+	SUB_IP_1       = os.Getenv("VALID_IP_ADDR_1")
+	SUB_IP_2       = os.Getenv("VALID_IP_ADDR_2")
+	ADMIN_PASSWORD = os.Getenv("ADMIN_PASSWORD")
 )
 
 // ValidateIP validates the IP address of the user to ensure it matches the config and returns a boolean indication and error.
