@@ -1,5 +1,7 @@
 /*
 Package services provides business logic for performing requests specific to each endpoint.
+
+Additionally, the package initializes an admin user during the package's initialization.
 */
 package services
 
@@ -19,21 +21,25 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// RegistrationPageVariables is a struct that represents the variables that are passed to the registration page template
 type RegistrationPageVariables struct {
 	User states.User
 	Tab  string
 }
 
+// AuthService is a struct that provides methods for handling business logics for requests to the /auth endpoint
 type AuthService struct {
 	Variables   RegistrationPageVariables
 	VariablesMu sync.Mutex
 }
 
+// Attendance is a struct that represents a user's attendance record
 type Attendance struct {
 	LoginID     string
 	CheckInTime time.Time
 }
 
+// Auth is a global variable that provides access to the AuthService methods
 var (
 	Auth AuthService = AuthService{}
 )
@@ -51,6 +57,9 @@ func init() {
 	logger.Println("Success!")
 }
 
+// The Login method handles the processing of form submissions for user login.
+// It checks the provided login ID and password, compares the password hash, and creates a session cookie upon successful login.
+// If the login is unsuccessful, the user is redirected to the login page with an error message.
 func (a *AuthService) Login(w http.ResponseWriter, r *http.Request) {
 	// process form submission
 	loginID := r.FormValue("loginID")
@@ -79,6 +88,8 @@ func (a *AuthService) Login(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+// Logout handles the processing of user logout requests.
+// It deletes the session cookie and redirects the user to the login page.
 func (a *AuthService) Logout(w http.ResponseWriter, r *http.Request) {
 	sessCookie, err := r.Cookie("sessCookie")
 	if err != nil {
@@ -103,8 +114,8 @@ func (a *AuthService) Logout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-// GetUser returns the user associated with the current session cookie
-// If no session cookie is found, an empty user is returned
+// GetUser returns the user associated with the current session cookie.
+// If no session cookie is found, an empty user is returned.
 func (a *AuthService) GetUser(r *http.Request) states.User {
 	user := states.User{}
 	// get current session cookie
@@ -125,6 +136,7 @@ func (a *AuthService) GetUser(r *http.Request) states.User {
 	return user
 }
 
+// RegisterPage renders the registration page template with the appropriate variables.
 func (a *AuthService) RegisterPage(w http.ResponseWriter, r *http.Request) {
 	currUser := Auth.GetUser(r)
 
@@ -142,6 +154,9 @@ func (a *AuthService) RegisterPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Register handles the processing of form submissions for user registration.
+// It checks if the user already exists, and if not, it hashes the password and registers the user.
+// If the user already exists, the user is redirected to the login page with an error message.
 func (a *AuthService) Register(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {

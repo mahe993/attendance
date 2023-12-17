@@ -12,19 +12,27 @@ import (
 	utils "attendance.com/src/util"
 )
 
+// UserPageVariables struct represents the variables used in the user page.
 type UserPageVariables struct {
 	User states.User
 	Tab  string
 }
+
+// UserService struct provides methods for handling business logics for requests to the "/user" endpoint
 type UserService struct {
 	Variables   UserPageVariables
 	VariablesMu sync.Mutex
 }
 
+// Usr is a global variable that provides access to the UserService methods
 var (
 	Usr UserService
 )
 
+// CheckIn handles the check-in process for a user.
+// It guards if the user is already checked in, and if they are on the appropriate WIFI.
+// It then updates the attendance.json file and redirects to the success page.
+// If any error occurs during the check-in process, it recovers from the panic and redirects to the home page.
 func (u *UserService) CheckIn(w http.ResponseWriter, r *http.Request) {
 	// isCheckedIn potentially panics
 	// Recover from panic and redirect to home page
@@ -73,6 +81,8 @@ func (u *UserService) CheckIn(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/user/attendance/success", http.StatusFound)
 }
 
+// CheckInSuccess redirects the user to the home page with the "attendanceSuccess" form value set to "success".
+// This is used to display a success message on the home page.
 func (u *UserService) CheckInSuccess(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/?attendanceSuccess=success", http.StatusFound)
 }

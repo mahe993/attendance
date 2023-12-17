@@ -17,17 +17,20 @@ import (
 	utils "attendance.com/src/util"
 )
 
+// OverviewFilters struct represents the filters used in the overview page
 type OverviewFilters struct {
 	DateFrom string
 	DateTo   string
 }
 
+// AdminPageVariables struct represents the variables that are passed to the admin page template
 type AdminPageVariables struct {
 	User    states.User
 	Tab     string
 	Filters OverviewFilters
 }
 
+// AdminService struct provides methods for handling business logics for requests to the /admin endpoint
 type AdminService struct {
 	Variables   AdminPageVariables
 	VariablesMu sync.Mutex
@@ -35,9 +38,14 @@ type AdminService struct {
 }
 
 var (
+	// Admin is a global variable that provides access to the AdminService methods
 	Admin AdminService
 )
 
+// Index handles the HTTP request to the admin index page.
+// It retrieves the current user, date filters, and tab information from the request.
+// If the tab is "overview" and the date filters are not provided, it redirects to the overview page with today's date.
+// It renders the admin page template with the provided variables.
 func (p *AdminService) Index(w http.ResponseWriter, r *http.Request) {
 	currUser := Auth.GetUser(r)
 	dateFrom, dateTo := r.FormValue("dateFrom"), r.FormValue("dateTo")
@@ -68,9 +76,9 @@ func (p *AdminService) Index(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// UploadStudentsList function is used to upload a CSV file containing a list of students.
-// Errors on non-CSV files, saves a copy of the uploaded CSV file to /db/uploads,
-// and updates the states.MapUsers state. DB users.json is then updated with the new states.MapUsers state.
+// UploadStudentsList handles the HTTP request to upload a CSV file containing a list of students.
+// It checks if the uploaded file is a CSV file, saves a copy of the file, and updates the user database.
+// The CSV file is also data validated to ensure it has the correct format.
 func (p *AdminService) UploadStudentsList(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -150,6 +158,11 @@ func (p *AdminService) UploadStudentsList(w http.ResponseWriter, r *http.Request
 	http.Redirect(w, r, "/admin/success", http.StatusFound)
 }
 
+// ExportAttendanceCSV handles the HTTP request to export attendance data as a CSV file.
+// It retrieves the date filters from the request and generates the CSV data.
+// It locks the export process to ensure thread-safe access to the CSV file.
+// It writes the CSV data to a temporary file, reads the file, and copies it to the response writer.
+// Finally, it deletes the temporary file.
 func (p *AdminService) ExportAttendanceCSV(w http.ResponseWriter, r *http.Request) {
 	dateFrom, dateTo := r.FormValue("dateFrom"), r.FormValue("dateTo")
 	checkedInUsers := templates.GetCheckedInUsers(dateFrom, dateTo)
