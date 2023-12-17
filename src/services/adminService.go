@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"attendance.com/src/db"
@@ -26,8 +27,11 @@ type AdminPageVariables struct {
 	Tab     string
 	Filters OverviewFilters
 }
+
 type AdminService struct {
-	Variables AdminPageVariables
+	Variables   AdminPageVariables
+	VariablesMu sync.Mutex
+	ExportMu    sync.Mutex
 }
 
 var (
@@ -36,9 +40,13 @@ var (
 
 func (p *AdminService) Index(w http.ResponseWriter, r *http.Request) {
 	currUser := Auth.GetUser(r)
+	dateFrom, dateTo := r.FormValue("dateFrom"), r.FormValue("dateTo")
+
+	// Mutex lock to ensure thread-safe access to shared Variables field
+	p.VariablesMu.Lock()
+	defer p.VariablesMu.Unlock()
 	p.Variables.User = currUser
 	p.Variables.Tab = strings.Split(r.URL.Path, "/")[len(strings.Split(r.URL.Path, "/"))-1]
-	dateFrom, dateTo := r.FormValue("dateFrom"), r.FormValue("dateTo")
 
 	if p.Variables.Tab == "overview" &&
 		(dateFrom == "" || dateTo == "") {
@@ -120,24 +128,24 @@ func (p *AdminService) UploadStudentsList(w http.ResponseWriter, r *http.Request
 		}
 
 		// if the student already exists in states.MapUsers, update their name
-		if user, ok := states.MapUsers[student.ID]; ok {
+		if user, ok := states.GetMapUser(student.ID); ok {
 			user.First, user.Last = student.First, student.Last
-			states.MapUsers[student.ID] = user
+			states.SetMapUser(student.ID, user)
 			continue
 		}
 
-		states.MapUsers[student.ID] = student
-	}
-
-	// Write MapUsers state to database
-	// Can potentially panic here if the database is not writable
-	err = db.Write(states.MapUsers, "users.json")
-	if err != nil {
-		logger.Println(err)
+		states.SetMapUser(student.ID, student)
 	}
 
 	// Wait for the CSV file to be saved
 	<-saveCSV
+
+	// Write MapUsers state to database
+	// Can potentially panic here if the database is not writable
+	err = db.Write(states.GetAllMapUsers(), "users.json")
+	if err != nil {
+		logger.Println(err)
+	}
 
 	http.Redirect(w, r, "/admin/success", http.StatusFound)
 }
@@ -185,6 +193,11 @@ func (p *AdminService) ExportAttendanceCSV(w http.ResponseWriter, r *http.Reques
 		dateFromTime = dateFromTime.AddDate(0, 0, 1)
 	}
 
+	// Mutex lock to ensure thread-safe access to returning CSV file to user.
+	// Without lock, it is potentially unsafe since fileName could be the same for multiple requests.
+	// The CSV file could be deleted before the response is returned to the user
+	p.ExportMu.Lock()
+	defer p.ExportMu.Unlock()
 	writeCsv := utils.WriteCSV("../temp/"+fileName, csvData)
 	<-writeCsv
 

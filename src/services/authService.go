@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"attendance.com/src/db"
@@ -24,7 +25,8 @@ type RegistrationPageVariables struct {
 }
 
 type AuthService struct {
-	Variables RegistrationPageVariables
+	Variables   RegistrationPageVariables
+	VariablesMu sync.Mutex
 }
 
 type Attendance struct {
@@ -40,12 +42,12 @@ func init() {
 	// init special access for admin
 	logger.Println("Initializing admin user")
 	bPassword, _ := bcrypt.GenerateFromPassword([]byte(os.Getenv("ADMIN_PASSWORD")), bcrypt.MinCost)
-	states.MapUsers["admin"] = states.User{
+	states.SetMapUser("admin", states.User{
 		ID:       "admin",
 		Password: bPassword,
 		First:    "admin",
 		Last:     "admin",
-	}
+	})
 	logger.Println("Success!")
 }
 
@@ -55,7 +57,7 @@ func (a *AuthService) Login(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 
 	// check if user exist with loginID
-	myUser, ok := states.MapUsers[loginID]
+	myUser, ok := states.GetMapUser(loginID)
 	if !ok {
 		http.Error(w, "Login ID and/or password do not match", http.StatusUnauthorized)
 		return
@@ -72,15 +74,23 @@ func (a *AuthService) Login(w http.ResponseWriter, r *http.Request) {
 	c := createSessCookie(w, r)
 
 	// map cookie value to loginID
-	states.MapSessions[<-c] = loginID
+	states.SetMapSession(<-c, loginID)
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (a *AuthService) Logout(w http.ResponseWriter, r *http.Request) {
-	sessCookie, _ := r.Cookie("sessCookie")
-	// delete the session
-	delete(states.MapSessions, sessCookie.Value)
+	sessCookie, err := r.Cookie("sessCookie")
+	if err != nil {
+		if err != http.ErrNoCookie {
+			logger.Println(err)
+		}
+	} else {
+		// delete the session
+		// this map operation is thread safe because cookie values are unique
+		delete(states.MapSessions, sessCookie.Value)
+	}
+
 	// remove the cookie
 	sessCookie = &http.Cookie{
 		Name:   "sessCookie",
@@ -93,6 +103,8 @@ func (a *AuthService) Logout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+// GetUser returns the user associated with the current session cookie
+// If no session cookie is found, an empty user is returned
 func (a *AuthService) GetUser(r *http.Request) states.User {
 	user := states.User{}
 	// get current session cookie
@@ -104,8 +116,10 @@ func (a *AuthService) GetUser(r *http.Request) states.User {
 		return user
 	}
 
-	if loginID, ok := states.MapSessions[sessCookie.Value]; ok {
-		user = states.MapUsers[loginID]
+	if loginID, ok := states.GetMapSession(sessCookie.Value); ok {
+		if usr, ok := states.GetMapUser(loginID); ok {
+			user = usr
+		}
 	}
 
 	return user
@@ -113,10 +127,14 @@ func (a *AuthService) GetUser(r *http.Request) states.User {
 
 func (a *AuthService) RegisterPage(w http.ResponseWriter, r *http.Request) {
 	currUser := Auth.GetUser(r)
+
+	// Mutex lock to ensure thread-safe access to shared Variables field
+	a.VariablesMu.Lock()
 	a.Variables.User = currUser
 	a.Variables.Tab = strings.Split(r.URL.Path, "/")[len(strings.Split(r.URL.Path, "/"))-1]
 
 	err := templates.Tpl.ExecuteTemplate(w, "registrationPage", a.Variables)
+	a.VariablesMu.Unlock()
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		log.Fatal("Template execution error:", err)
@@ -137,10 +155,7 @@ func (a *AuthService) Register(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 
 	// check if user exist with loginID
-	logger.Println(states.MapUsers)
-	user, ok := states.MapUsers[loginID]
-	logger.Println(user)
-
+	user, ok := states.GetMapUser(loginID)
 	if ok {
 		// check if user already has a password
 		if len(user.Password) > 0 {
@@ -162,11 +177,11 @@ func (a *AuthService) Register(w http.ResponseWriter, r *http.Request) {
 
 	// register user
 	user.Password = bPassword
-	states.MapUsers[loginID] = user
+	states.SetMapUser(loginID, user)
 
 	// Write MapUsers state to database
 	// Can potentially panic here if the database is not writable
-	err = db.Write(states.MapUsers, "users.json")
+	err = db.Write(states.GetAllMapUsers(), "users.json")
 	if err != nil {
 		logger.Println(err)
 	}

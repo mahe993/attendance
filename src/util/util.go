@@ -80,8 +80,8 @@ func ReadCSV(file io.Reader) ([][]string, error) {
 // WriteCSV writes the given CSV data to the given file path.
 // It returns a channel that can be used to wait for the write to complete.
 // Saving a copy of csv uploads is low priority and thus does not panic on errors
-func WriteCSV(filePath string, csvData [][]string) <-chan *os.File {
-	done := make(chan *os.File)
+func WriteCSV(filePath string, csvData [][]string) <-chan bool {
+	done := make(chan bool)
 	go func() {
 		defer close(done)
 
@@ -90,6 +90,7 @@ func WriteCSV(filePath string, csvData [][]string) <-chan *os.File {
 			logger.Println(fmt.Sprint("Error creating CSV file:", err))
 			return
 		}
+		defer destFile.Close()
 
 		// Write each row of the CSV data to the output file.
 		csvWriter := csv.NewWriter(destFile)
@@ -100,7 +101,7 @@ func WriteCSV(filePath string, csvData [][]string) <-chan *os.File {
 			}
 		}
 		csvWriter.Flush()
-		done <- destFile
+
 	}()
 
 	return done

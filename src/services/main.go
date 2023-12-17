@@ -3,6 +3,7 @@ package services
 import (
 	"log"
 	"net/http"
+	"sync"
 
 	"attendance.com/src/states"
 	"attendance.com/src/templates"
@@ -13,7 +14,8 @@ type MainPageVariables struct {
 	Tab  string
 }
 type MainService struct {
-	Variables MainPageVariables
+	Variables   MainPageVariables
+	VariablesMu sync.Mutex
 }
 
 var (
@@ -27,7 +29,6 @@ func (p *MainService) Index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p.Variables.User = currUser
 	successTab := r.FormValue("attendanceSuccess")
 	if successTab == "success" {
 		if templates.IsCheckedIn(currUser.ID) == "" {
@@ -35,9 +36,16 @@ func (p *MainService) Index(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+
+	// Mutex lock to ensure thread-safe access to shared Variables field
+	// Prevents race conditions when multiple requests concurrently read/write to Variables
+	p.VariablesMu.Lock()
+	p.Variables.User = currUser
 	p.Variables.Tab = successTab
 
 	err := templates.Tpl.ExecuteTemplate(w, "index", p.Variables)
+	p.VariablesMu.Unlock()
+
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		log.Fatal("Template execution error:", err)

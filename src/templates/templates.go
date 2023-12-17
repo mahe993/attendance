@@ -36,7 +36,7 @@ func IsCheckedIn(id string) string {
 	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 
 	// Check if user is already checked in
-	if loggedInUsers, ok := states.MapAttendance[today]; ok {
+	if loggedInUsers, ok := states.GetMapAttendanceOuter(today); ok {
 		if checkedInTime, ok := loggedInUsers[id]; ok {
 			return checkedInTime.Format("Monday, 2 Jan 2006, 3:04:05 PM")
 		}
@@ -61,16 +61,18 @@ func GetCheckedInUsers(dateFrom string, dateTo string) CheckedInUsers {
 
 	for dateFromTime.Before(dateToTime) || dateFromTime.Equal(dateToTime) {
 		k := dateFromTime.Format("2006-01-02")
-		if loggedInUsers, ok := states.MapAttendance[dateFromTime]; ok {
+		if loggedInUsers, ok := states.GetMapAttendanceOuter(dateFromTime); ok {
 			checkedInUsers[k] = make(map[string]AttendanceDetails)
-			for id := range states.MapUsers {
+			for id := range states.GetAllMapUsers() {
 				if id == "admin" {
 					continue
 				}
 				if checkedInTime, ok := loggedInUsers[id]; ok {
-					checkedInUsers[k][id] = AttendanceDetails{
-						CheckInTime: checkedInTime.Format("Monday, 2 Jan 2006, 3:04:05 PM"),
-						Name:        states.MapUsers[id].First + " " + states.MapUsers[id].Last,
+					if usr, ok := states.GetMapUser(id); ok {
+						checkedInUsers[k][id] = AttendanceDetails{
+							CheckInTime: checkedInTime.Format("Monday, 2 Jan 2006, 3:04:05 PM"),
+							Name:        usr.First + " " + usr.Last,
+						}
 					}
 				}
 			}
