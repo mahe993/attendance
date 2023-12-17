@@ -1,3 +1,8 @@
+/*
+Package logger provides a custom logging utility with additional file name and line number information.
+
+The logger package includes a Println function, which logs messages along with the file name and line number from where the logging function is called.
+*/
 package logger
 
 import (
@@ -7,6 +12,8 @@ import (
 	"strings"
 )
 
+// The Println function logs a message along with the file name and line number from where it is called.
+// It uses the runtime.Caller function to retrieve the caller's file name and line number.
 func Println(msg interface{}) {
 	_, file, line, ok := runtime.Caller(1)
 	if !ok {

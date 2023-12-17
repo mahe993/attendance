@@ -1,5 +1,9 @@
 /*
-Package controllers handles routing to specific services.
+Package controllers provides HTTP request handling for administrative operations.
+
+The controllers package handles routing to specific services, facilitating the interaction with the attendance management system.
+
+The controllers includes methods to handle HTTP methods such as POST and GET. Requests are routed to specific services based on the URL path.
 */
 package controllers
 
@@ -10,12 +14,15 @@ import (
 	"attendance.com/src/services"
 )
 
+// AdminController handles HTTP request handling for administrative operations.
 type AdminController struct{}
 
 var (
+	// Admin is an instance of AdminController.
 	Admin AdminController
 )
 
+// Controller routes the HTTP request to the appropriate method based on the HTTP method.
 func (*AdminController) Controller(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
@@ -31,6 +38,7 @@ func (*AdminController) Controller(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// POST handles the HTTP POST request and routes it to the appropriate service based on the URL path.
 func (*AdminController) POST(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimPrefix(r.URL.Path, "/admin")
 
@@ -44,6 +52,7 @@ func (*AdminController) POST(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GET handles the HTTP GET request and routes it to the appropriate service based on the URL path.
 func (*AdminController) GET(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimPrefix(r.URL.Path, "/admin")
 

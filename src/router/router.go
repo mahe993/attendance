@@ -1,5 +1,26 @@
 /*
-Package router handles routing to specific controllers
+Package router handles HTTP request routing to specific controllers.
+
+The router package provides a Routes function that routes the request to the appropriate controller based on the requested path.
+
+The Routes function is responsible for routing HTTP requests to specific controllers based on the requested path. It includes logic to handle authentication, authorization, and serve static files.
+
+Supported Paths:
+
+The Routes function supports the following paths:
+
+- /: Routes to the MainPage controller.
+- /auth: Routes to the Auth controller.
+- /admin: Routes to the Admin controller, performing admin authentication check.
+- /user: Routes to the User controller, performing user authentication check.
+
+Static Files:
+
+Static files such as CSS and JavaScript are served for paths ending with ".css" and ".js" respectively.
+
+Authentication and Authorization:
+
+Routes can be protected by using the checkAuth function.
 */
 package router
 
@@ -12,6 +33,8 @@ import (
 	"attendance.com/src/services"
 )
 
+// The Routes function is responsible for routing HTTP requests to specific controllers based on the requested path.
+// It includes logic to handle authentication, authorization, and serve static files.
 func Routes(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 	logger.Println("route:: " + path + "\n")
@@ -40,6 +63,7 @@ func Routes(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// The checkAuth function is used to perform authentication and authorization checks based on the requested path.
 func checkAuth(w http.ResponseWriter, r *http.Request, adminCheck bool) bool {
 	currUser := services.Auth.GetUser(r)
 

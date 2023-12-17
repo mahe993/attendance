@@ -1,6 +1,3 @@
-/*
-Package controllers handles routing to specific services.
-*/
 package controllers
 
 import (
@@ -10,12 +7,15 @@ import (
 	"attendance.com/src/services"
 )
 
+// AuthController represents the controller for handling authentication-related requests.
 type AuthController struct{}
 
 var (
+	// Auth is an instance of AuthController.
 	Auth AuthController
 )
 
+// Controller routes the HTTP request to the appropriate method based on the HTTP method.
 func (*AuthController) Controller(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
@@ -31,6 +31,7 @@ func (*AuthController) Controller(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// POST routes the POST requests to the appropriate services
 func (*AuthController) POST(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimPrefix(r.URL.Path, "/auth")
 
@@ -46,6 +47,7 @@ func (*AuthController) POST(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GET routes the GET requests to the appropriate services
 func (*AuthController) GET(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimPrefix(r.URL.Path, "/auth")
 
