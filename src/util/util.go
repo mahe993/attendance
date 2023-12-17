@@ -37,7 +37,7 @@ func ValidateIP() (bool, error) {
 
 			for _, v := range addresses {
 				addressSlice := strings.Split(v.String(), ".")
-				validIPSlice := strings.Split(os.Getenv("DEV_IP_ADDR"), ".")
+				validIPSlice := strings.Split(os.Getenv("VALID_IP_ADDR"), ".")
 
 				// check if address slice == x.x.x.x
 				if len(addressSlice) == 4 {
