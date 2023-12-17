@@ -53,10 +53,6 @@ func GetCheckedInUsers(dateFrom string, dateTo string) CheckedInUsers {
 	dateFromTime, err := time.ParseInLocation("2006-01-02", dateFrom, time.Now().Location())
 	if err != nil {
 		return checkedInUsers
-
-	}
-	if err != nil {
-		return checkedInUsers
 	}
 	dateToTime, err := time.ParseInLocation("2006-01-02", dateTo, time.Now().Location())
 	if err != nil {

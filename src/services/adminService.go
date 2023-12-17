@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -131,39 +132,71 @@ func (p *AdminService) UploadStudentsList(w http.ResponseWriter, r *http.Request
 	http.Redirect(w, r, "/admin/success", http.StatusFound)
 }
 
-// func (p *AdminService) exportAttendanceCSV(w http.ResponseWriter, r *http.Request) {
-// 	dateFrom, dateTo := r.FormValue("dateFrom"), r.FormValue("dateTo")
-// 	checkedInUsers := templates.GetCheckedInUsers(dateFrom, dateTo)
+func (p *AdminService) ExportAttendanceCSV(w http.ResponseWriter, r *http.Request) {
+	dateFrom, dateTo := r.FormValue("dateFrom"), r.FormValue("dateTo")
+	checkedInUsers := templates.GetCheckedInUsers(dateFrom, dateTo)
 
-// 	fileName := fmt.Sprintf("Attendance_%s_TO_%s.csv", dateFrom, dateTo)
-// 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", fileName))
-// 	w.Header().Set("Content-Type", "text/csv")
+	if dateFrom == "" || dateTo == "" {
+		http.Error(w, "Error exporting CSV, check to ensure a valid date range is selected.", http.StatusBadRequest)
+		return
+	}
+	dateFromTime, err := time.ParseInLocation("2006-01-02", dateFrom, time.Now().Location())
+	if err != nil {
+		http.Error(w, "Error exporting CSV, check to ensure a valid date range is selected.", http.StatusBadRequest)
+		return
+	}
+	dateToTime, err := time.ParseInLocation("2006-01-02", dateTo, time.Now().Location())
+	if err != nil {
+		http.Error(w, "Error exporting CSV, check to ensure a valid date range is selected.", http.StatusBadRequest)
+		return
+	}
+	if dateFromTime.After(dateToTime) {
+		http.Error(w, "Error exporting CSV, check to ensure a valid date range is selected.", http.StatusBadRequest)
+		return
+	}
 
-// 	destFile, err := os.Create(fileName)
-// 	if err != nil {
-// 		logger.Println(fmt.Sprint("Error creating CSV file:", err))
-// 		return
-// 	}
-// 	defer destFile.Close()
+	fileName := fmt.Sprintf("Attendance_%s_TO_%s.csv", dateFrom, dateTo)
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", fileName))
+	w.Header().Set("Content-Type", "text/csv")
 
-// 	// Write each row of the CSV data to the output file.
-// 	csvWriter := csv.NewWriter(destFile)
-// 	for _, line := range checkedInUsers {
-// 		if err := csvWriter.Write(line); err != nil {
-// 			logger.Println(fmt.Sprint("Error writing to CSV file:", err))
-// 			return
-// 		}
-// 	}
-// 	csvWriter.Flush()
+	// parse checkedInUsers into a [][]string csv data
+	csvData := [][]string{{"Date", "ID", "Name", "Check-In Time"}}
+	for dateFromTime.Before(dateToTime) || dateFromTime.Equal(dateToTime) {
+		k := dateFromTime.Format("2006-01-02")
+		if users, ok := checkedInUsers[k]; ok {
+			if users != nil {
+				for id, details := range users {
+					csvData = append(csvData, []string{k, id, details.Name, details.CheckInTime})
+				}
+			} else {
+				csvData = append(csvData, []string{k, "-", "-", "-"})
+			}
+		}
+		dateFromTime = dateFromTime.AddDate(0, 0, 1)
+	}
 
-// 	// Create a new CSV file for saving the uploaded data.
-// 	// The new file will be created in the uploads folder with the name
-// 	// studentList_<timestamp>.csv
-// 	// e.g. studentList_2021-08-01_12:00:00.csv
-// 	saveCSV := utils.WriteCSV(fmt.Sprintf("%s/db/uploads/checkedInUsers_%s.csv", os.Getenv("APP_BASE_PATH"), time.Now().Format("2006-01-02_15:04:05")), checkedInUsers.ToCSV())
+	writeCsv := utils.WriteCSV("../temp/"+fileName, csvData)
+	<-writeCsv
 
-// 	// Wait for the CSV file to be saved
-// 	<-saveCSV
+	// Open and read the CSV file
+	file, err := os.Open("../temp/" + fileName)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-// 	http.Redirect(w, r, "/admin/success", http.StatusFound)
-// }
+	// Copy the file to the response writer
+	_, err = io.Copy(w, file)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	file.Close()
+
+	// Delete the CSV file from the temp folder
+	err = os.Remove("../temp/" + fileName)
+	if err != nil {
+		logger.Println(err)
+	}
+
+}

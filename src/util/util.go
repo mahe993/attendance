@@ -37,7 +37,7 @@ func ValidateIP() (bool, error) {
 
 			for _, v := range addresses {
 				addressSlice := strings.Split(v.String(), ".")
-				validIPSlice := strings.Split(os.Getenv("VALID_IP_ADDR"), ".")
+				validIPSlice := strings.Split(os.Getenv("DEV_IP_ADDR"), ".")
 
 				// check if address slice == x.x.x.x
 				if len(addressSlice) == 4 {
@@ -80,8 +80,8 @@ func ReadCSV(file io.Reader) ([][]string, error) {
 // WriteCSV writes the given CSV data to the given file path.
 // It returns a channel that can be used to wait for the write to complete.
 // Saving a copy of csv uploads is low priority and thus does not panic on errors
-func WriteCSV(filePath string, csvData [][]string) <-chan bool {
-	done := make(chan bool)
+func WriteCSV(filePath string, csvData [][]string) <-chan *os.File {
+	done := make(chan *os.File)
 	go func() {
 		defer close(done)
 
@@ -90,7 +90,6 @@ func WriteCSV(filePath string, csvData [][]string) <-chan bool {
 			logger.Println(fmt.Sprint("Error creating CSV file:", err))
 			return
 		}
-		defer destFile.Close()
 
 		// Write each row of the CSV data to the output file.
 		csvWriter := csv.NewWriter(destFile)
@@ -101,6 +100,7 @@ func WriteCSV(filePath string, csvData [][]string) <-chan bool {
 			}
 		}
 		csvWriter.Flush()
+		done <- destFile
 	}()
 
 	return done

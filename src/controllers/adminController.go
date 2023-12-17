@@ -37,6 +37,8 @@ func (*AdminController) POST(w http.ResponseWriter, r *http.Request) {
 	switch path {
 	case "/upload":
 		services.Admin.UploadStudentsList(w, r)
+	case "/export":
+		services.Admin.ExportAttendanceCSV(w, r)
 	default:
 		http.NotFound(w, r)
 	}

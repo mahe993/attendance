@@ -238,3 +238,8 @@ footer {
   justify-content: center;
   gap: 1rem;
 }
+
+#attendance-name,
+#attendance-id {
+  min-width: 40%;
+}
