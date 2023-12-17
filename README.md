@@ -66,6 +66,7 @@ cd <project-root-directory>/src
 - Notable subsections includes:
   - Utility -- for util functions
   - Database functions -- for Read/Write operations to JSON
+  - States -- Maintains a local state, handled with sync package to ensure no race conditions
 
 Go doc available at:
 
