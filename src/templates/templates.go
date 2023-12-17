@@ -1,5 +1,13 @@
 /*
-Package templates initializes all the templates for use in services.
+Package templates initializes and provides HTML templates for use in services.
+
+The templates package includes a global variable Tpl, which is a pointer to a template.Template object. It also provides functions for template execution and rendering.
+
+Initialization:
+
+During package initialization, the Tpl variable is initialized with HTML templates and associated functions.
+
+Note: The templates are assumed to be located in the "./templates/" directory and have a ".gohtml" extension.
 */
 package templates
 
@@ -11,6 +19,7 @@ import (
 	"attendance.com/src/states"
 )
 
+// AttendanceDetails struct represents details about a user's attendance, including check-in time and name
 type AttendanceDetails struct {
 	CheckInTime string
 	Name        string
@@ -19,6 +28,7 @@ type AttendanceDetails struct {
 // CheckedInUsers is a map of date to map of user id to check in time
 type CheckedInUsers map[string]map[string]AttendanceDetails
 
+// Tpl is a pointer to a template.Template object that holds all initialized HTML templates
 var Tpl *template.Template
 
 func init() {
@@ -31,6 +41,8 @@ func init() {
 
 }
 
+// IsCheckedIn checks if a user is already checked in and returns the check-in time in a formatted string.
+// If the user is not checked in, it returns an empty string.
 func IsCheckedIn(id string) string {
 	now := time.Now()
 	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
@@ -45,6 +57,8 @@ func IsCheckedIn(id string) string {
 	return ""
 }
 
+// GetCheckedInUsers retrieves a map of checked-in users within a specified date range.
+// The date range is specified by the dateFrom and dateTo parameters, which are expected to be in the format "YYYY-MM-DD".
 func GetCheckedInUsers(dateFrom string, dateTo string) CheckedInUsers {
 	checkedInUsers := make(CheckedInUsers)
 	if dateFrom == "" || dateTo == "" {

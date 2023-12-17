@@ -1,5 +1,7 @@
 /*
-Package utils offers various utility functions that can be used throughout the application.
+Package utils provides various utility functions that can be used throughout the application.
+
+The utils package includes functions for validating IP addresses, reading and writing CSV files, and other general-purpose utilities.
 */
 package utils
 
@@ -16,6 +18,8 @@ import (
 )
 
 // ValidateIP validates the IP address of the user to ensure it matches the config and returns a boolean indication and error.
+// It returns true if the IP address is valid, false if it is not, and an error if one occurs.
+// It is used to ensure that users are on the appropriate WIFI before checking in.
 func ValidateIP() (bool, error) {
 	interfaces, err := net.Interfaces()
 	if err != nil {
@@ -68,6 +72,8 @@ func ValidateIP() (bool, error) {
 	return false, nil
 }
 
+// ReadCSV reads CSV data from the given io.Reader.
+// It returns a 2D slice of strings representing the CSV data and an error.
 func ReadCSV(file io.Reader) ([][]string, error) {
 	reader := csv.NewReader(file)
 	records, err := reader.ReadAll()

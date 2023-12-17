@@ -10,7 +10,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// User represents the metadata of an authenticated user
+// User struct represents the metadata of an authenticated user
 type User struct {
 	ID       string
 	Password []byte
@@ -21,13 +21,16 @@ type User struct {
 // Variables that holds all user and session details
 var (
 	MapUsersMutex sync.Mutex
-	MapUsers      = map[string]User{}
+	// MapUsers is a map of user IDs to User structs
+	MapUsers = map[string]User{}
 
 	MapSessionsMutex sync.Mutex
-	MapSessions      = map[string]string{}
+	// MapSessions is a map of session IDs to user IDs
+	MapSessions = map[string]string{}
 
 	MapAttendanceMutex sync.Mutex
-	MapAttendance      = map[time.Time]map[string]time.Time{}
+	// MapAttendance is a map of dateTimes to a map of user IDs to check-in times
+	MapAttendance = map[time.Time]map[string]time.Time{}
 )
 
 func init() {
