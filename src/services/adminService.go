@@ -94,6 +94,16 @@ func (p *AdminService) UploadStudentsList(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	if len(csvData[0]) != 3 {
+		http.Error(w, "Invalid CSV file format. Please ensure the CSV file has only 3 columns (ID, First Name, Last Name)", http.StatusBadRequest)
+		return
+	}
+
+	if csvData[0][0] != "ID" || csvData[0][1] != "First" || csvData[0][2] != "Last" {
+		http.Error(w, "Invalid CSV file format. Please ensure the CSV file has header of 3 columns (ID, First, Last)", http.StatusBadRequest)
+		return
+	}
+
 	// Create a new CSV file for saving the uploaded data.
 	// The new file will be created in the uploads folder with the name
 	// studentList_<timestamp>.csv
