@@ -149,3 +149,92 @@ footer {
 #success-check-in {
   margin-block: 2rem;
 }
+
+#admin-overview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 2rem;
+  border-radius: 20px;
+  width: 80%;
+  min-height: 60dvh;
+  max-height: 60dvh;
+  background-color: rgb(255, 254, 250);
+  letter-spacing: 1px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.526);
+  overflow: scroll;
+  gap: 3rem;
+}
+
+::-webkit-scrollbar {
+  width: 0; /* Remove scrollbar width */
+}
+
+#overview-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  font-weight: bold;
+}
+
+.date-input {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+#date-range-form-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+#attendance-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.25rem;
+  width: 100%;
+  font-weight: 400;
+  font-size: 0.9rem;
+}
+
+.attendance-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rem;
+  width: 80%;
+  padding: 0.5rem;
+  border-radius: 10px;
+  background-color: #139a6f;
+  color: rgb(245, 245, 245);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.526);
+}
+
+.attendance-details {
+  display: flex;
+  min-width: 30%;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.export-input {
+  display: none;
+}
+
+#overview-form {
+  margin-block-start: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}

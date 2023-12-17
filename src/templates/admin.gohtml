@@ -17,7 +17,7 @@
         {{else if eq .Tab "success"}}
             <div>Upload Success!</div>
         {{else if eq .Tab "overview"}}
-            {{template "adminOverview"}}
+            {{template "adminOverview" .Filters}}
         {{end}}
 
     </body>

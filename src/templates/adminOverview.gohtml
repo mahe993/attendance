@@ -1,3 +1,49 @@
 {{define "adminOverview"}}
-    <div id="admin-overview">Overviewwww</div>
+    <div id="overview-form">
+        <div>
+            <form id="date-range-form">
+                <div id="date-range-form-container">
+                    <div class="date-input">
+                        <label for="dateFrom">From:</label>
+                        <input type="date" id="dateFrom" name="dateFrom" value={{.DateFrom}}>
+                    </div>
+                    <div class="date-input">
+                        <label for="dateTo">To:</label>
+                        <input type="date" id="dateTo" name="dateTo" value={{.DateTo}}>
+                    </div>
+                    <button type="submit">
+                        filter
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div>
+            <form id="export-range-form" method="POST" action="/admin/export">
+                <div id="export-range-form-container">
+                    <div class="export-input">
+                        <label for="dateFrom">From:</label>
+                        <input type="date" id="dateFrom" name="dateFrom" value={{.DateFrom}}>
+                    </div>
+                    <div class="export-input">
+                        <label for="dateTo">To:</label>
+                        <input type="date" id="dateTo" name="dateTo" value={{.DateTo}}>
+                    </div>
+                    <button type="submit">
+                        export .csv
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="admin-overview">
+        {{range $date, $users := getCheckIns .DateFrom .DateTo}}
+            <div id="overview-box">
+                <div>
+                    Date: {{$date}}
+                </div>
+                {{template "attendanceBox" $users}}
+            </div>
+        {{end}}
+    </div>
 {{end}}

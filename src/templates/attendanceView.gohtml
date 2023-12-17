@@ -1,0 +1,23 @@
+{{define "attendanceBox"}}
+    <div id="attendance-box">
+        {{if not .}} 
+            <em>No Checked-in users for this date</em>
+        {{else}}
+            {{range $id, $details := .}}
+                <div class="attendance-line">
+                    <div class="attendance-details">
+                        <div class="attendance-name">
+                            {{$details.Name}}
+                        </div>
+                        <div class="attendance-id">
+                            {{$id}}
+                        </div>
+                    </div>
+                    <div class="attendance-time attendance-details">
+                        {{$details.CheckInTime}}
+                    </div>
+                </div>
+            {{end}}
+        {{end}}
+    </div>
+{{end}}

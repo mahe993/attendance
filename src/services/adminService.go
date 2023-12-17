@@ -15,9 +15,15 @@ import (
 	utils "attendance.com/src/util"
 )
 
+type OverviewFilters struct {
+	DateFrom string
+	DateTo   string
+}
+
 type AdminPageVariables struct {
-	User states.User
-	Tab  string
+	User    states.User
+	Tab     string
+	Filters OverviewFilters
 }
 type AdminService struct {
 	Variables AdminPageVariables
@@ -31,6 +37,19 @@ func (p *AdminService) Index(w http.ResponseWriter, r *http.Request) {
 	currUser := Auth.GetUser(r)
 	p.Variables.User = currUser
 	p.Variables.Tab = strings.Split(r.URL.Path, "/")[len(strings.Split(r.URL.Path, "/"))-1]
+	dateFrom, dateTo := r.FormValue("dateFrom"), r.FormValue("dateTo")
+
+	if p.Variables.Tab == "overview" &&
+		(dateFrom == "" || dateTo == "") {
+		today := time.Now().Format("2006-01-02")
+		http.Redirect(w, r, fmt.Sprintf("/admin/overview?dateFrom=%s&dateTo=%s", today, today), http.StatusFound)
+		return
+	}
+
+	p.Variables.Filters = OverviewFilters{
+		DateFrom: dateFrom,
+		DateTo:   dateTo,
+	}
 
 	err := templates.Tpl.ExecuteTemplate(w, "adminPage", p.Variables)
 	if err != nil {
@@ -111,3 +130,40 @@ func (p *AdminService) UploadStudentsList(w http.ResponseWriter, r *http.Request
 
 	http.Redirect(w, r, "/admin/success", http.StatusFound)
 }
+
+// func (p *AdminService) exportAttendanceCSV(w http.ResponseWriter, r *http.Request) {
+// 	dateFrom, dateTo := r.FormValue("dateFrom"), r.FormValue("dateTo")
+// 	checkedInUsers := templates.GetCheckedInUsers(dateFrom, dateTo)
+
+// 	fileName := fmt.Sprintf("Attendance_%s_TO_%s.csv", dateFrom, dateTo)
+// 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", fileName))
+// 	w.Header().Set("Content-Type", "text/csv")
+
+// 	destFile, err := os.Create(fileName)
+// 	if err != nil {
+// 		logger.Println(fmt.Sprint("Error creating CSV file:", err))
+// 		return
+// 	}
+// 	defer destFile.Close()
+
+// 	// Write each row of the CSV data to the output file.
+// 	csvWriter := csv.NewWriter(destFile)
+// 	for _, line := range checkedInUsers {
+// 		if err := csvWriter.Write(line); err != nil {
+// 			logger.Println(fmt.Sprint("Error writing to CSV file:", err))
+// 			return
+// 		}
+// 	}
+// 	csvWriter.Flush()
+
+// 	// Create a new CSV file for saving the uploaded data.
+// 	// The new file will be created in the uploads folder with the name
+// 	// studentList_<timestamp>.csv
+// 	// e.g. studentList_2021-08-01_12:00:00.csv
+// 	saveCSV := utils.WriteCSV(fmt.Sprintf("%s/db/uploads/checkedInUsers_%s.csv", os.Getenv("APP_BASE_PATH"), time.Now().Format("2006-01-02_15:04:05")), checkedInUsers.ToCSV())
+
+// 	// Wait for the CSV file to be saved
+// 	<-saveCSV
+
+// 	http.Redirect(w, r, "/admin/success", http.StatusFound)
+// }

@@ -22,6 +22,11 @@ var (
 
 func (p *MainService) Index(w http.ResponseWriter, r *http.Request) {
 	currUser := Auth.GetUser(r)
+	if currUser.ID == "admin" {
+		http.Redirect(w, r, "/admin/overview", http.StatusFound)
+		return
+	}
+
 	p.Variables.User = currUser
 	successTab := r.FormValue("attendanceSuccess")
 	if successTab == "success" {

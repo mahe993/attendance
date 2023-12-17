@@ -37,7 +37,6 @@ func ValidateIP() (bool, error) {
 
 			for _, v := range addresses {
 				addressSlice := strings.Split(v.String(), ".")
-				// TODO: change to NP_IP_ADDR to test different network
 				validIPSlice := strings.Split(os.Getenv("VALID_IP_ADDR"), ".")
 
 				// check if address slice == x.x.x.x
