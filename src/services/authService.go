@@ -24,7 +24,6 @@ type RegistrationPageVariables struct {
 }
 
 type AuthService struct {
-	currUser  states.User
 	Variables RegistrationPageVariables
 }
 
@@ -72,8 +71,6 @@ func (a *AuthService) Login(w http.ResponseWriter, r *http.Request) {
 	// create session cookie
 	c := createSessCookie(w, r)
 
-	a.currUser = myUser
-
 	// map cookie value to loginID
 	states.MapSessions[<-c] = loginID
 
@@ -93,25 +90,25 @@ func (a *AuthService) Logout(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, sessCookie)
 
-	a.currUser = states.User{}
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (a *AuthService) GetUser(r *http.Request) states.User {
+	user := states.User{}
 	// get current session cookie
 	sessCookie, err := r.Cookie("sessCookie")
 	if err != nil {
 		if err != http.ErrNoCookie {
 			logger.Println(err)
 		}
-		return a.currUser
+		return user
 	}
 
 	if loginID, ok := states.MapSessions[sessCookie.Value]; ok {
-		a.currUser = states.MapUsers[loginID]
+		user = states.MapUsers[loginID]
 	}
 
-	return a.currUser
+	return user
 }
 
 func (a *AuthService) RegisterPage(w http.ResponseWriter, r *http.Request) {
