@@ -27,8 +27,4 @@ func Println(msg interface{}) {
 	// Log the message along with file name and line number
 	log.Printf(":::%s:%d:::\n%v\n", fileName, line, msg)
 	fmt.Println()
-	log. Printf(" DONT FORMAT THIS %s",
-	 fileName)
 }
-
-
