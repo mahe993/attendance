@@ -62,7 +62,6 @@ func WriteCSV(filePath string, csvData [][]string) <-chan bool {
 // It returns true if the IP address is valid, false if it is not, and an error if one occurs.
 // It is used to ensure that users are on the appropriate WIFI before checking in.
 func ValidateClientIPHandler(r *http.Request) (bool, error) {
-
 	IPAddress := r.Header.Get("X-Real-Ip")
 	if IPAddress == "" {
 		IPAddress = r.Header.Get("X-Forwarded-For")
@@ -79,6 +78,7 @@ func ValidateClientIPHandler(r *http.Request) (bool, error) {
 		return false, nil
 	}
 
+	logger.Println("IP Address:" + IPAddress)
 	// validate IP
 	addressSlice := strings.Split(IPAddress, ".")
 	validIPSlice := strings.Split(os.Getenv("VALID_IP_ADDR"), ".")
@@ -92,7 +92,7 @@ func ValidateClientIPHandler(r *http.Request) (bool, error) {
 		logger.Println(err)
 		return false, err
 	}
-	octetRange2, err := strconv.Atoi(addressSlice[3][:3])
+	octetRange2, err := strconv.Atoi(addressSlice[3])
 	if err != nil {
 		logger.Println(err)
 		return false, err
