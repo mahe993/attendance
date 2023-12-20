@@ -9,68 +9,13 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
-	"net"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
 
 	"attendance.com/src/logger"
 )
-
-// ValidateIP validates the IP address of the user to ensure it matches the config and returns a boolean indication and error.
-// It returns true if the IP address is valid, false if it is not, and an error if one occurs.
-// It is used to ensure that users are on the appropriate WIFI before checking in.
-func ValidateIP() (bool, error) {
-	interfaces, err := net.Interfaces()
-	if err != nil {
-		logger.Println(err)
-		return false, err
-	}
-
-	for _, i := range interfaces {
-		if i.Name == "en0" {
-			byName, err := net.InterfaceByName(i.Name)
-			if err != nil {
-				logger.Println(err)
-			}
-
-			addresses, err := byName.Addrs()
-			if err != nil {
-				logger.Println(err)
-			}
-
-			for _, v := range addresses {
-				addressSlice := strings.Split(v.String(), ".")
-				validIPSlice := strings.Split(os.Getenv("VALID_IP_ADDR"), ".")
-
-				// check if address slice == x.x.x.x
-				if len(addressSlice) == 4 {
-					octetRange1, err := strconv.Atoi(addressSlice[2])
-					if err != nil {
-						logger.Println(err)
-						return false, err
-					}
-					octetRange2, err := strconv.Atoi(addressSlice[3][:3])
-					if err != nil {
-						logger.Println(err)
-						return false, err
-					}
-
-					// validate address
-					if addressSlice[0] == validIPSlice[0] &&
-						addressSlice[1] == validIPSlice[1] &&
-						octetRange1 >= 0 && octetRange1 <= 255 &&
-						octetRange2 >= 0 && octetRange2 <= 255 {
-						return true, nil
-					}
-					return false, nil
-				}
-			}
-		}
-	}
-
-	return false, nil
-}
 
 // ReadCSV reads CSV data from the given io.Reader.
 // It returns a 2D slice of strings representing the CSV data and an error.
@@ -111,4 +56,57 @@ func WriteCSV(filePath string, csvData [][]string) <-chan bool {
 	}()
 
 	return done
+}
+
+// ValidateClientIPHandler validates the IP address of the user to ensure it matches the config and returns a boolean indication and error.
+// It returns true if the IP address is valid, false if it is not, and an error if one occurs.
+// It is used to ensure that users are on the appropriate WIFI before checking in.
+func ValidateClientIPHandler(r *http.Request) (bool, error) {
+
+	IPAddress := r.Header.Get("X-Real-Ip")
+	if IPAddress == "" {
+		IPAddress = r.Header.Get("X-Forwarded-For")
+	}
+	if IPAddress == "" {
+		IPAddress = r.Header.Get("CF-Connecting-IP")
+	}
+	if IPAddress == "" {
+		IPAddress = r.RemoteAddr
+	}
+
+	// unable to verify IP address
+	if IPAddress == "" {
+		return false, nil
+	}
+
+	// validate IP
+	addressSlice := strings.Split(IPAddress, ".")
+	validIPSlice := strings.Split(os.Getenv("VALID_IP_ADDR"), ".")
+
+	// check if address slice == x.x.x.x
+	if len(addressSlice) != 4 {
+		return false, nil
+	}
+	octetRange1, err := strconv.Atoi(addressSlice[2])
+	if err != nil {
+		logger.Println(err)
+		return false, err
+	}
+	octetRange2, err := strconv.Atoi(addressSlice[3][:3])
+	if err != nil {
+		logger.Println(err)
+		return false, err
+	}
+
+	// validate address
+	if addressSlice[0] == validIPSlice[0] &&
+		addressSlice[1] == validIPSlice[1] &&
+		octetRange1 >= 0 && octetRange1 <= 255 &&
+		octetRange2 >= 0 && octetRange2 <= 255 {
+		return true, nil
+	}
+
+	// IP not in range
+	return false, nil
+
 }

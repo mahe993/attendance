@@ -56,7 +56,7 @@ func (u *UserService) CheckIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if user is on appropriate WIFI
-	ok, err := utils.ValidateIP()
+	ok, err := utils.ValidateClientIPHandler(r)
 	if !ok || err != nil {
 		logger.Println(err)
 		http.Error(w, "Unable to check-in. You are not on the appropriate WIFI.", http.StatusForbidden)

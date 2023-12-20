@@ -31,6 +31,7 @@ import (
 	"attendance.com/src/controllers"
 	"attendance.com/src/logger"
 	"attendance.com/src/services"
+	utils "attendance.com/src/util"
 )
 
 // The Routes function is responsible for routing HTTP requests to specific controllers based on the requested path.
@@ -38,6 +39,7 @@ import (
 func Routes(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 	logger.Println("route:: " + path + "\n")
+	utils.ValidateClientIPHandler(r)
 	switch {
 	case path == "/":
 		services.MainPage.Index(w, r)
