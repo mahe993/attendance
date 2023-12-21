@@ -78,7 +78,6 @@ func ValidateClientIPHandler(r *http.Request) (bool, error) {
 		return false, nil
 	}
 
-	logger.Println("IP Address:" + IPAddress)
 	// validate IP
 	addressSlice := strings.Split(IPAddress, ".")
 	validIPSlice := strings.Split(os.Getenv("VALID_IP_ADDR"), ".")
